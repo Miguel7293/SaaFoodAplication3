@@ -4,8 +4,7 @@ import 'package:flutter_application_example/screens/user_screens/plate_detail_sc
 import 'package:flutter_application_example/data/plate_provider_prueba.dart'; // Asegúrate de importar el modelo
 
 class CardPlates extends StatefulWidget {
-  final Plate plate; // Cambiamos a Plate en vez de String image y String name
-
+  final Plate plate;
   const CardPlates({super.key, required this.plate});
 
   @override
