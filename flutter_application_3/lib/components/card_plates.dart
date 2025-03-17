@@ -42,13 +42,13 @@ class _CardPlatesState extends State<CardPlates> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Image.network(
-                  widget.plate.image, // Ahora usa el objeto Plate
+                  widget.plate.image, 
                   width: 120,
                   height: 120,
                   fit: BoxFit.fitHeight,
                 ),
               ),
-              Text(widget.plate.name), // También usa el objeto Plate
+              Text(widget.plate.name),
             ],
           ),
         ),
