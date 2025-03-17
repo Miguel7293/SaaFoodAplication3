@@ -16,10 +16,7 @@ class PlatesListView extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) => Padding(
           padding: const EdgeInsets.symmetric(horizontal: 1),
-          child: CardPlates(
-            image: plates[index].image,
-            name: plates[index].name,
-          ),
+          child: CardPlates(plate: plates[index])
         ),
       ),
     );
