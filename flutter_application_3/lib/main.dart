@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_example/core/main_colors.dart';
 import 'package:flutter_application_example/screens/user_screens/main_user_screen.dart';
 
 void main() {
@@ -16,9 +15,22 @@ class MainApp extends StatelessWidget {
         body: Center(
           child: UserHomeScreen(),
         ),
+        bottomNavigationBar:
+            BottomNavigationBar(items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.tiktok),
+            label: "TikTok Obvi",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Settings",
+          )
+        ]),
       ),
     );
-
-    
   }
 }
