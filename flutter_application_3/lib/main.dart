@@ -1,9 +1,8 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'core/constants/main_colors.dart';
-import 'presentation/screens/user_screens/main_user_screen.dart';
-import 'presentation/screens/user_screens/map_user_screen.dart';
-import 'presentation/screens/user_screens/user_profile_screen.dart';
+import 'presentation/screens/Owner_screens/main_Owner_screen.dart';
+import 'presentation/screens/owner_screens/owner_profile_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -20,19 +19,18 @@ class _MainAppState extends State<MainApp> {
   int index = 1;
 
   final screens = [
-    MapUserScreen(),
-    UserHomeScreen(),
-    UserProfileScreen()
+    OwnerHomeScreen(),
+    const SizedBox.shrink(), // Ítem vacío
+    OwnerProfileScreen()
   ];
 
-  @override
+@override
   Widget build(BuildContext context) {
     final items = <Widget>[
       Icon(Icons.map, size: 30),
-      Icon(Icons.home, size: 30),
-      Icon(Icons.account_circle, size: 30)
+      const SizedBox.shrink(), // Ítem vacío
+      Icon(Icons.account_circle, size: 30),
     ];
-
 
     return MaterialApp(
       home: Scaffold(
