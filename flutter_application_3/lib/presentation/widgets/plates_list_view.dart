@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_example/components/card_plates.dart';
-import 'package:flutter_application_example/data/plate_provider_prueba.dart'; // Importa la clase Plate
+import 'card_plates.dart';
+import '../../data/models/plate_provider_prueba.dart'; // Importa la clase Plate
 
 class PlatesListView extends StatelessWidget {
   final List<Plate> plates;

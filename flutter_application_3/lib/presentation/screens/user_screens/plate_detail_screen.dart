@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_example/core/main_colors.dart';
-import 'package:flutter_application_example/data/plate_provider_prueba.dart';
+import '../../../core/constants/main_colors.dart';
+import '../../../data/models/plate_provider_prueba.dart';
 
 class PlateDetailScreen extends StatelessWidget {
   final Plate plate; 

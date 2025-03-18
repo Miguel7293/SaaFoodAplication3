@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_example/components/card_rest.dart';
-import 'package:flutter_application_example/data/rest_provider_prueba.dart';
+import 'card_rest.dart';
+import '../../../data/models/rest_provider_prueba.dart';
 
 class RestaurantsListView extends StatelessWidget {
   final List<Restaurant> restaurants;

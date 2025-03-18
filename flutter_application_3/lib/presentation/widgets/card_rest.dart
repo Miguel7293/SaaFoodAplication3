@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_example/core/main_colors.dart';
-import 'package:flutter_application_example/data/rest_provider_prueba.dart';
-import 'package:flutter_application_example/screens/user_screens/rest_detail_screen.dart';
+import '../../../core/constants/main_colors.dart';
+import '../../../data/models/rest_provider_prueba.dart';
+import '../screens/user_screens/rest_detail_screen.dart';
 
 class RestaurantCard extends StatelessWidget {
   final Restaurant res;

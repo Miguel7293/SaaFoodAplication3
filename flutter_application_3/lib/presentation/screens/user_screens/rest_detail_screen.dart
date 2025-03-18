@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_example/core/main_colors.dart';
-import 'package:flutter_application_example/data/rest_provider_prueba.dart';
+import '../../../../core/constants/main_colors.dart';
+import '../../../../data/models/rest_provider_prueba.dart';
 
 class RestDetailScreen extends StatelessWidget {
   final Restaurant res;

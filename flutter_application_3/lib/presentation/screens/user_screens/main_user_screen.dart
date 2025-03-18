@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_example/components/plates_list_view.dart';
-import 'package:flutter_application_example/components/rest_list_view.dart';
-import 'package:flutter_application_example/data/plate_provider_prueba.dart';
-import 'package:flutter_application_example/data/rest_provider_prueba.dart';
+import '../../widgets/plates_list_view.dart';
+import '../..//widgets/rest_list_view.dart';
+import '../../../data/models/plate_provider_prueba.dart';
+import '../../../data/models/rest_provider_prueba.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
