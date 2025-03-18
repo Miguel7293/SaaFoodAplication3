@@ -10,7 +10,7 @@ class PlatesListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 180,
+      height: 190,
       child: ListView.builder(
         itemCount: plates.length,
         scrollDirection: Axis.horizontal,

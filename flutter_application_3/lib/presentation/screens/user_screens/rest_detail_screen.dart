@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/presentation/widgets/plates_list_view.dart';
 import '../../../../core/constants/main_colors.dart';
 import '../../../../data/models/rest_provider_prueba.dart';
+import '../../../../data/models/plate_provider_prueba.dart';
 
 class RestDetailScreen extends StatelessWidget {
   final Restaurant res;
@@ -10,6 +12,7 @@ class RestDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color statusColor = res.state == "Abierto" ? Colors.green : Colors.red;
+    final cartas = CartaService.getCartasByRestaurantId(res.restaurantId);
 
     return Scaffold(
       appBar: AppBar(
@@ -84,6 +87,27 @@ class RestDetailScreen extends StatelessWidget {
                     res.description,
                     style: const TextStyle(fontSize: 16),
                   ),
+                  const SizedBox(height: 20),
+
+                  // Cartas y sus platos
+                  ...cartas.map((carta) {
+                    final plates = PlateService.getPlatesByCartaId(carta.cartaId);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          carta.cartaId.toString(), // Asumo que la carta tiene un nombre
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 200, // Espacio para mostrar los platos horizontalmente
+                          child: PlatesListView(plates: plates),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    );
+                  }).toList(),
                 ],
               ),
             ),

@@ -79,7 +79,7 @@ class PlateProvider {
       price: 18.50,
       available: true,
       image: "https://www.lima2019.pe/sites/default/files/inline-images/preview-gallery-001.jpg",
-      cartId: 6,
+      cartId: 1,
       category: "Arroz",
     ),
     Plate(
@@ -89,7 +89,7 @@ class PlateProvider {
       price: 20.00,
       available: true,
       image: "https://www.lima2019.pe/sites/default/files/inline-images/preview-gallery-009.jpg",
-      cartId: 7,
+      cartId: 1,
       category: "Pasta",
     ),
     Plate(
@@ -99,7 +99,7 @@ class PlateProvider {
       price: 14.00,
       available: true,
       image: "https://www.lima2019.pe/sites/default/files/inline-images/preview-gallery-007.jpg",
-      cartId: 8,
+      cartId: 2,
       category: "Sopa",
     ),
     Plate(
@@ -109,7 +109,7 @@ class PlateProvider {
       price: 18.00,
       available: true,
       image: "https://www.lima2019.pe/sites/default/files/inline-images/preview-gallery-002.jpg",
-      cartId: 9,
+      cartId: 4,
       category: "Criollo",
     ),
     Plate(
@@ -119,8 +119,15 @@ class PlateProvider {
       price: 24.00,
       available: true,
       image: "https://www.lima2019.pe/sites/default/files/inline-images/preview-gallery-003.jpg",
-      cartId: 10,
+      cartId: 5,
       category: "Parrilla",
     ),
   ];
+}
+
+
+class PlateService {
+  static List<Plate> getPlatesByCartaId(int cartaId) {
+    return PlateProvider.plates.where((plate) => plate.cartId == cartaId).toList();
+  }
 }

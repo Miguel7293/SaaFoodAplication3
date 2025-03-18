@@ -1,56 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/constants/main_colors.dart';
 import '../screens/user_screens/plate_detail_screen.dart';
-import '../../data/models/plate_provider_prueba.dart'; // Asegúrate de importar el modelo
+import '../../data/models/plate_provider_prueba.dart';
 
-class CardPlates extends StatefulWidget {
+class CardPlates extends StatelessWidget {
   final Plate plate;
+
   const CardPlates({super.key, required this.plate});
 
-  @override
-  State<CardPlates> createState() => _CardPlatesState();
-}
-
-class _CardPlatesState extends State<CardPlates> {
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
+      child: InkWell(
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PlateDetailScreen(plate: widget.plate),
+            builder: (context) => PlateDetailScreen(plate: plate), // Carga la imagen HD aquí
           ),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.grayDark,
-                spreadRadius: 3,
-                blurRadius: 2,
-                offset: const Offset(0, 3),
-              )
-            ],
-          ),
+        borderRadius: BorderRadius.circular(10),
+        child: Material(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(10),
+          elevation: 2,
           child: Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.network(
-                  widget.plate.image, 
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.fitHeight,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: CachedNetworkImage(
+                    imageUrl: plate.image, 
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+                    fadeInDuration: const Duration(milliseconds: 300),
+                    placeholder: (context, url) => _buildLowResImage(plate.image),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error, size: 50, color: Colors.red),
+                  ),
                 ),
               ),
-              Text(widget.plate.name),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Text(
+                  plate.name,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// 📌 Muestra una versión en baja resolución antes de la imagen real
+  Widget _buildLowResImage(String highResUrl) {
+    String lowResUrl = highResUrl.replaceAll('.jpg', '_low.jpg'); // Simulación de baja resolución
+    return Image.network(
+      lowResUrl,
+      width: 120,
+      height: 120,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Container(
+        width: 120,
+        height: 120,
+        color: Colors.grey[300], // Placeholder si no hay imagen de baja calidad
       ),
     );
   }
