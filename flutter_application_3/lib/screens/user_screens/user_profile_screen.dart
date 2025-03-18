@@ -10,6 +10,8 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder(child: Text("Settings Profile"),);
+    return const Column(children: [
+      Text("Settings Profile"),
+    ]);
   }
 }

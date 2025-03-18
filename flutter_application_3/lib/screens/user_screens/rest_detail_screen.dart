@@ -1,0 +1,95 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_application_example/core/main_colors.dart';
+import 'package:flutter_application_example/data/rest_provider_prueba.dart';
+
+class RestDetailScreen extends StatelessWidget {
+  final Restaurant res;
+
+  const RestDetailScreen({super.key, required this.res});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color statusColor = res.state == "Abierto" ? Colors.green : Colors.red;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(res.name),
+        backgroundColor: AppColors.background,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Imagen del restaurante
+            Image.network(
+              res.imageOfLocal,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Nombre y categoría
+                  Text(
+                    res.name,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      const Icon(Icons.restaurant, size: 20, color: Colors.grey),
+                      const SizedBox(width: 5),
+                      Text(res.category, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Horario y Estado
+                  Row(
+                    children: [
+                      const Icon(Icons.schedule, size: 20, color: Colors.grey),
+                      const SizedBox(width: 5),
+                      Text(res.horario, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                      const SizedBox(width: 10),
+                      Text(
+                        res.state,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: statusColor),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Número de contacto
+                  Row(
+                    children: [
+                      const Icon(Icons.phone, size: 20, color: Colors.grey),
+                      const SizedBox(width: 5),
+                      GestureDetector(
+                        onTap: () => {},
+                        child: Text(
+                          res.contactNumber,
+                          style: const TextStyle(fontSize: 16, color: Colors.blue, decoration: TextDecoration.underline),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+
+                  // Descripción
+                  Text(
+                    res.description,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
