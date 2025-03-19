@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/data/models/restaurant.dart';
 import '../../../core/constants/main_colors.dart';
-import '../../../data/models/rest_provider_prueba.dart';
 import '../screens/user_screens/rest_detail_screen.dart';
 
 class RestaurantCard extends StatelessWidget {
@@ -38,7 +38,7 @@ class RestaurantCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildImage(res.imageOfLocal),
+              _buildImage(res.imageOfLocal ?? "https://e1.pngegg.com/pngimages/555/986/png-clipart-media-filetypes-jpg-icon-thumbnail.png"),
               _buildInfoSection(res, statusColor),
             ],
           ),
@@ -96,7 +96,7 @@ class RestaurantCard extends StatelessWidget {
       children: [
         const Icon(Icons.restaurant, size: 18, color: Colors.grey),
         const SizedBox(width: 5),
-        Text(res.category, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+        Text(res.category ?? "sin categoria", style: const TextStyle(fontSize: 14, color: Colors.grey)),
         const SizedBox(width: 10),
         Row(
           children: List.generate(
@@ -121,7 +121,7 @@ class RestaurantCard extends StatelessWidget {
         Text(res.horario, style: const TextStyle(fontSize: 14, color: Colors.grey)),
         const SizedBox(width: 10),
         Text(
-          res.state,
+          res.state ?? "default",
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: statusColor),
         ),
       ],

@@ -83,9 +83,4 @@ class RestaurantProvider {
 }
 
 
-class CartaService {
-  static List<Carta> getCartasByRestaurantId(int restaurantId) {
-    return CartaProvider.cartas.where((carta) => carta.restCart == restaurantId).toList();
-  }
-}
 

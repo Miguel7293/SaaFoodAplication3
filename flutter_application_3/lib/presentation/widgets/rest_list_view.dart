@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'card_rest.dart';
-import '../../../data/models/rest_provider_prueba.dart';
+import 'package:flutter_application_example/data/models/restaurant.dart'; // Usa el modelo correcto
 
 class RestaurantsListView extends StatelessWidget {
   final List<Restaurant> restaurants;

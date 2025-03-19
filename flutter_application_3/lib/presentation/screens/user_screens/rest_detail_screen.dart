@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/data/models/cart_provider_prueba.dart';
+import 'package:flutter_application_example/data/models/restaurant.dart';
 import 'package:flutter_application_example/presentation/widgets/plates_list_view.dart';
 import '../../../../core/constants/main_colors.dart';
-import '../../../../data/models/rest_provider_prueba.dart';
 import '../../../../data/models/plate_provider_prueba.dart';
 
 class RestDetailScreen extends StatelessWidget {
@@ -11,7 +12,8 @@ class RestDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color statusColor = res.state == "Abierto" ? Colors.green : Colors.red;
+    final Color statusColor =
+        res.state == "Abierto" ? Colors.green : Colors.red;
     final cartas = CartaService.getCartasByRestaurantId(res.restaurantId);
 
     return Scaffold(
@@ -25,7 +27,8 @@ class RestDetailScreen extends StatelessWidget {
           children: [
             // Imagen del restaurante
             Image.network(
-              res.imageOfLocal,
+              res.imageOfLocal ??
+                  "https://e1.pngegg.com/pngimages/555/986/png-clipart-media-filetypes-jpg-icon-thumbnail.png", // Imagen de respaldo
               width: double.infinity,
               height: 200,
               fit: BoxFit.cover,
@@ -39,14 +42,18 @@ class RestDetailScreen extends StatelessWidget {
                   // Nombre y categoría
                   Text(
                     res.name,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 5),
                   Row(
                     children: [
-                      const Icon(Icons.restaurant, size: 20, color: Colors.grey),
+                      const Icon(Icons.restaurant,
+                          size: 20, color: Colors.grey),
                       const SizedBox(width: 5),
-                      Text(res.category, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                      Text(res.category ?? "Categoría desconocida",
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.grey)),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -56,11 +63,16 @@ class RestDetailScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.schedule, size: 20, color: Colors.grey),
                       const SizedBox(width: 5),
-                      Text(res.horario, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                      Text(res.horario,
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.grey)),
                       const SizedBox(width: 10),
                       Text(
-                        res.state,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: statusColor),
+                        res.state ?? "Estado desconocido",
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: statusColor),
                       ),
                     ],
                   ),
@@ -75,7 +87,10 @@ class RestDetailScreen extends StatelessWidget {
                         onTap: () => {},
                         child: Text(
                           res.contactNumber,
-                          style: const TextStyle(fontSize: 16, color: Colors.blue, decoration: TextDecoration.underline),
+                          style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline),
                         ),
                       ),
                     ],
@@ -84,24 +99,28 @@ class RestDetailScreen extends StatelessWidget {
 
                   // Descripción
                   Text(
-                    res.description,
+                    res.description ?? "sin descripción",
                     style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 20),
 
                   // Cartas y sus platos
                   ...cartas.map((carta) {
-                    final plates = PlateService.getPlatesByCartaId(carta.cartaId);
+                    final plates =
+                        PlateService.getPlatesByCartaId(carta.cartaId);
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          carta.cartaId.toString(), // Asumo que la carta tiene un nombre
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          carta.cartaId
+                              .toString(), // Asumo que la carta tiene un nombre
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 10),
                         SizedBox(
-                          height: 200, // Espacio para mostrar los platos horizontalmente
+                          height:
+                              200, // Espacio para mostrar los platos horizontalmente
                           child: PlatesListView(plates: plates),
                         ),
                         const SizedBox(height: 20),
