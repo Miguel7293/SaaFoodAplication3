@@ -13,14 +13,19 @@ class LoginScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text('Login Screen'),
-            ElevatedButton(
-              onPressed: () {
-                // Login exitoso
-                Provider.of<AuthProvider>(context, listen: false).login();
-                Navigator.pushReplacementNamed(context, '/main'); // Ruta corregida
-              },
-              child: const Text('Iniciar Sesión'),
-            ),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    await Provider.of<AuthProvider>(context, listen: false).loginWithGoogle();
+                    Navigator.pushReplacementNamed(context, '/main');
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                },
+                child: const Text('Iniciar con Google'),
+              ),
             TextButton(
               onPressed: () => Navigator.pushNamed(context, '/signup'),
               child: const Text('¿No tienes cuenta? Regístrate'),
