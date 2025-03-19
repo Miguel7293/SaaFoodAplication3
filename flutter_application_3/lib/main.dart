@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/data/services/user_repository.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'config/supabase/supabase_config.dart';
@@ -18,6 +19,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         Provider(create: (_) => CartaRepository()), 
         Provider(create: (_) => RestaurantRepository()), 
+        Provider(create: (_) => UserRepository()), 
       ],
       child: const App(),
     ),

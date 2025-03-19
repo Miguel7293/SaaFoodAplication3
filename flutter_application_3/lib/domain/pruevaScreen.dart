@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/data/services/user_repository.dart';
 import 'package:provider/provider.dart';
 import '../data/services/carta_repository.dart';
 import '../data/services/restaurant_repository.dart'; // Asegúrate de importar esto
@@ -13,13 +14,16 @@ class PruevaScreen extends StatefulWidget {
 
 class _PruevaScreenState extends State<PruevaScreen> {
   late CartaRepository _cartaRepo;
-  late RestaurantRepository _restaurantRepo; // Definir repositorio de restaurantes
+  late RestaurantRepository _restaurantRepo;
+  late UserRepository _userRepo;
 
   @override
   void initState() {
     super.initState();
     _cartaRepo = Provider.of<CartaRepository>(context, listen: false);
     _restaurantRepo = Provider.of<RestaurantRepository>(context, listen: false);
+    _userRepo = Provider.of<UserRepository>(context, listen: false);
+
     cargarDatos();
   }
 
@@ -63,6 +67,16 @@ class _PruevaScreenState extends State<PruevaScreen> {
       }
     } catch (e) {
       debugPrint("Error al obtener restaurantes: $e");
+    }
+
+    // Obtener el usuario authenticated
+    try {
+      final user = await _userRepo.getAuthenticatedUser();
+      debugPrint("Usuario Autenticado ----->");
+      debugPrint("UID: ${user.userUid}, Email: ${user.email}, Nombre: ${user.username}, Tipo: ${user.typeUser}, Registrado: ${user.createdAt}");
+    
+    } catch (e){
+      debugPrint("Error al obtener usuario: $e");
     }
   }
 
