@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/domain/pruevaScreen.dart';
 import '../../core/constants/main_colors.dart';
 import '../screens/user_screens/main_user_screen.dart';
 import '../screens/user_screens/map_user_screen.dart';

@@ -4,14 +4,17 @@ import '../models/carta.dart';
 class CartaRepository {
   final _client = SupabaseConfig.client;
 
-  // Obtener cartas por restaurante
-  Future<List<Carta>> getCartasByRestaurant(int restaurantId) async {
-    final response = await _client
-        .from('carta')
-        .select()
-        .eq('rest_cart', restaurantId);
+  /// Obtiene todas las cartas registradas en la base de datos.
+  /// 
+  /// Retorna una lista de objetos `Carta`.
+  /// 
+  /// ### Uso:
+  /// ```dart
+  /// final cartas = await cartaRepository.getAllCartas();
+  /// ```
+  Future<List<Carta>> getAllCartas() async {
+    final response = await _client.from('carta').select();
 
-    // Asegurar que el resultado es una lista de mapas antes de mapear
     if (response is List) {
       return response.map((json) => Carta.fromJson(json as Map<String, dynamic>)).toList();
     } else {
@@ -19,35 +22,27 @@ class CartaRepository {
     }
   }
 
-  // Crear carta
-  Future<Carta> createCarta({
-    required String type,
-    required String description,
-    required int restCart,
-  }) async {
+    /// Obtiene todas las cartas asociadas a un restaurante específico.
+  /// 
+  /// - [restaurantId]: ID del restaurante al que pertenecen las cartas.
+  /// 
+  /// Retorna una lista de objetos `Carta`.
+  /// 
+  /// ### Uso:
+  /// ```dart
+  /// final cartas = await cartaRepository.getCartasByRestaurant(18);
+  /// ```
+  Future<List<Carta>> getCartasByRestaurant(int restaurantId) async {
     final response = await _client
         .from('carta')
-        .insert({
-          'type': type, 
-          'description': description,
-          'rest_cart': restCart
-        })
         .select()
-        .single();
+        .eq('rest_cart', restaurantId);
 
-    return Carta.fromJson(response);
+    if (response is List) {
+      return response.map((json) => Carta.fromJson(json as Map<String, dynamic>)).toList();
+    } else {
+      throw Exception('Formato de datos inesperado: $response');
+    }
   }
 
-  // Actualizar carta
-  Future<void> updateCarta({
-    required int cartaId,
-    required String newDescription,
-    required String userId,
-  }) async {
-    await _client
-        .from('carta')
-        .update({'description': newDescription})
-        .eq('carta_id', cartaId)
-        .eq('restaurants.id_dueno', userId);
-  }
 }
