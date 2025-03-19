@@ -63,7 +63,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const PlusDishesScreen(),
+                          builder: (context) => const AddDishesScreen(),
                         ),
                       );
                     },
@@ -88,7 +88,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const PlusDishesScreen(),
+                          builder: (context) => const AddDishesScreen(),
                         ),
                       );
                     },
