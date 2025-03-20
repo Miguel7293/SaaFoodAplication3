@@ -38,6 +38,7 @@ class UserHomeScreen extends StatelessWidget {
               PlatesListView(plates: plates), 
               const SectionTitle(title: "RESTAURANTES CERCANOS"),
               RestaurantsListView(restaurants: restaurants),
+              SizedBox(height: 180)
             ],
           ),
         );

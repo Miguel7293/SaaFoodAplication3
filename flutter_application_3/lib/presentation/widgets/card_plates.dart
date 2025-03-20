@@ -17,7 +17,8 @@ class CardPlates extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PlateDetailScreen(plate: plate), // Carga la imagen HD aquí
+            builder: (context) =>
+                PlateDetailScreen(plate: plate), // Carga la imagen HD aquí
           ),
         ),
         borderRadius: BorderRadius.circular(10),
@@ -32,12 +33,13 @@ class CardPlates extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: CachedNetworkImage(
-                    imageUrl: plate.image, 
+                    imageUrl: plate.image,
                     width: 120,
                     height: 120,
                     fit: BoxFit.cover,
                     fadeInDuration: const Duration(milliseconds: 300),
-                    placeholder: (context, url) => _buildLowResImage(plate.image),
+                    placeholder: (context, url) =>
+                        _buildLowResImage(plate.image),
                     errorWidget: (context, url, error) =>
                         const Icon(Icons.error, size: 50, color: Colors.red),
                   ),
@@ -47,7 +49,18 @@ class CardPlates extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Text(
                   plate.name,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(0),
+                child: Text(
+                  "\$${plate.price?.toStringAsFixed(2) ?? '0.00'}",
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green),
                 ),
               ),
             ],
@@ -59,7 +72,8 @@ class CardPlates extends StatelessWidget {
 
   /// 📌 Muestra una versión en baja resolución antes de la imagen real
   Widget _buildLowResImage(String highResUrl) {
-    String lowResUrl = highResUrl.replaceAll('.jpg', '_low.jpg'); // Simulación de baja resolución
+    String lowResUrl = highResUrl.replaceAll(
+        '.jpg', '_low.jpg'); // Simulación de baja resolución
     return Image.network(
       lowResUrl,
       width: 120,

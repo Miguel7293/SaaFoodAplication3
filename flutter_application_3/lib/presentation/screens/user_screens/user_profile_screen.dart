@@ -69,15 +69,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 // Tipo de usuario
                 _buildProfileInfo("Tipo de Usuario", user.typeUser),
 
-                // Fecha de creación
+                // Fecha de creacion
                 _buildProfileInfo("Cuenta creada el", "${user.createdAt.toLocal()}".split(' ')[0]),
 
                 const SizedBox(height: 20),
 
-                // Botón de Cerrar Sesión
+                // Botón de Cerrar Sesion
                 ElevatedButton.icon(
                   onPressed: () {
-                    // Aquí puedes agregar la lógica para cerrar sesión
+
+
                   },
                   icon: const Icon(Icons.exit_to_app),
                   label: const Text("Cerrar Sesión"),
@@ -95,7 +96,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  /// Widget para mostrar información con un título y valor
+  /// Widget para mostrar información con un titulo y valor
   Widget _buildProfileInfo(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

@@ -148,7 +148,7 @@ class CartaWithPlatesWidget extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             SizedBox(
-              height: 200, // Espacio para mostrar los platos horizontalmente
+              height: 215, // Espacio para mostrar los platos horizontalmente
               child: PlatesListView(plates: plates),
             ),
             const SizedBox(height: 20),
