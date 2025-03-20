@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/data/models/plate.dart';
+import '../../../data/services/plate_repository.dart';
+import '../../../data/services/restaurant_repository.dart';
 import '../../widgets/plates_list_view.dart';
-import '../../../data/models/plate_provider_prueba.dart';
-import '../../../data/models/rest_provider_prueba.dart';
 import 'plus_dishes.dart';
 
 class OwnerHomeScreen extends StatefulWidget {
@@ -12,96 +13,96 @@ class OwnerHomeScreen extends StatefulWidget {
 }
 
 class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
-  final myplates = PlateProvider.plates;
-  final myrest = RestaurantProvider.restaurants;
+  final PlateRepository plateRepository = PlateRepository();
+  final RestaurantRepository restaurantRepository = RestaurantRepository();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Name Of Restaurant'),
       ),
-      body: SingleChildScrollView(
-        
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Carta Actual',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Desayuno',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(height: 10), 
-            PlatesListView(plates: myplates),
-            const Divider(),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Cartas Desactivadas',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-                children: [
-                  const Text(
-                    'Almuerzo',
+      body: FutureBuilder(
+        future: plateRepository.getAllPlates(), // Obtener platos desde Supabase
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+
+          final myplates = snapshot.data ?? [];
+
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'Carta Actual',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'Desayuno',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AddDishesScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.add, size: 30), // Botón '+'
+                ),
+                const SizedBox(height: 10),
+                PlatesListView(plates: myplates),
+                const Divider(),
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'Cartas Desactivadas',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                ],
-              ),
+                ),
+                _buildCategorySection("Almuerzo", myplates, context),
+                _buildCategorySection("Cena", myplates, context),
+              ],
             ),
-            const SizedBox(height: 10), 
-            PlatesListView(plates: myplates), 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, // Alinear elementos
-                children: [
-                  const Text(
-                    'Cena',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AddDishesScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.add, size: 30), // Botón '+'
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10), 
-            PlatesListView(plates: myplates), 
-          ],
-        ),
+          );
+        },
       ),
     );
   }
+
+Widget _buildCategorySection(String title, List<Plate> plates, BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddDishesScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add, size: 30),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        PlatesListView(plates: plates),
+      ],
+    ),
+  );
+}
+
 }

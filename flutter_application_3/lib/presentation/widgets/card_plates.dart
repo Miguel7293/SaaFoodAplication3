@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_application_example/data/models/plate.dart';
 import '../../core/constants/main_colors.dart';
 import '../screens/user_screens/plate_detail_screen.dart';
-import '../../data/models/plate_provider_prueba.dart';
 
 class CardPlates extends StatelessWidget {
   final Plate plate;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_example/data/models/plate_provider_prueba.dart';
+import 'package:flutter_application_example/data/services/plate_repository.dart';
+import 'package:flutter_application_example/data/models/plate.dart';
+import 'package:flutter_application_example/data/models/restaurant.dart';
 import 'package:flutter_application_example/presentation/widgets/plates_list_view.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/rest_list_view.dart';
@@ -11,8 +13,10 @@ class UserHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Provider.of<RestaurantRepository>(context, listen: false)
-          .getAllRestaurants(),
+      future: Future.wait([
+        Provider.of<RestaurantRepository>(context, listen: false).getAllRestaurants(),
+        PlateRepository().getAllPlates(),
+      ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -21,21 +25,43 @@ class UserHomeScreen extends StatelessWidget {
           return Center(child: Text("Error: ${snapshot.error}"));
         }
 
-        final restaurants = snapshot.data ?? [];
+        final restaurants = (snapshot.data?[0] as List).map((e) => e as Restaurant).toList();
+        final plates = snapshot.data?[1] as List<Plate>? ?? [];
 
-        return Column(
-          children: [
-            Text("HOT DEALS"),
-            PlatesListView(plates: PlateProvider.plates),
-            Text("RECOMENDATIONS"),
-            PlatesListView(
-                plates: PlateProvider
-                    .plates), //SI VEN ESTO ES PARA USAR EL SCROLL HORIZONTAL DE PLATOS
-            const Text("RESTAURANTES CERCANOS"),
-            RestaurantsListView(restaurants: restaurants),
-          ],
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SectionTitle(title: "HOT DEALS"),
+              PlatesListView(plates: plates), 
+              const SectionTitle(title: "RECOMMENDATIONS"),
+              PlatesListView(plates: plates), 
+              const SectionTitle(title: "RESTAURANTES CERCANOS"),
+              RestaurantsListView(restaurants: restaurants),
+            ],
+          ),
         );
       },
+    );
+  }
+}
+
+class SectionTitle extends StatelessWidget {
+  final String title;
+
+  const SectionTitle({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }
