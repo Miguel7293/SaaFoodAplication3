@@ -26,12 +26,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Future<void> _loadData() async {
-    final restaurants = await Provider.of<RestaurantRepository>(context, listen: false).getAllRestaurants();
+    final restaurants =
+        await Provider.of<RestaurantRepository>(context, listen: false)
+            .getAllRestaurants();
     final plates = await PlateRepository().getAllPlates();
-    setState(() {
-      allRestaurants = restaurants;
-      allPlates = plates;
-    });
+
+    if (mounted) {
+      setState(() {
+        allRestaurants = restaurants;
+        allPlates = plates;
+      });
+    }
   }
 
   @override
@@ -47,7 +52,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SearchScreen(allPlates: allPlates, allRestaurants: allRestaurants),
+                  builder: (context) => SearchScreen(
+                      allPlates: allPlates, allRestaurants: allRestaurants),
                 ),
               );
             },
