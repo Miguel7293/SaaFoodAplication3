@@ -2,65 +2,70 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_example/data/services/plate_repository.dart';
 import 'package:flutter_application_example/data/models/plate.dart';
 import 'package:flutter_application_example/data/models/restaurant.dart';
-import 'package:flutter_application_example/presentation/widgets/plates_list_view.dart';
+import 'package:flutter_application_example/presentation/screens/user_screens/search_screen.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/rest_list_view.dart';
 import '../../../data/services/restaurant_repository.dart';
+import '../../widgets/plates_list_view.dart';
 
-class UserHomeScreen extends StatelessWidget {
+class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: Future.wait([
-        Provider.of<RestaurantRepository>(context, listen: false).getAllRestaurants(),
-        PlateRepository().getAllPlates(),
-      ]),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text("Error: ${snapshot.error}"));
-        }
-
-        final restaurants = (snapshot.data?[0] as List).map((e) => e as Restaurant).toList();
-        final plates = snapshot.data?[1] as List<Plate>? ?? [];
-
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SectionTitle(title: "HOT DEALS"),
-              PlatesListView(plates: plates), 
-              const SectionTitle(title: "RECOMMENDATIONS"),
-              PlatesListView(plates: plates), 
-              const SectionTitle(title: "RESTAURANTES CERCANOS"),
-              RestaurantsListView(restaurants: restaurants),
-              SizedBox(height: 180)
-            ],
-          ),
-        );
-      },
-    );
-  }
+  _UserHomeScreenState createState() => _UserHomeScreenState();
 }
 
-class SectionTitle extends StatelessWidget {
-  final String title;
+class _UserHomeScreenState extends State<UserHomeScreen> {
+  List<Restaurant> allRestaurants = [];
+  List<Plate> allPlates = [];
 
-  const SectionTitle({super.key, required this.title});
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final restaurants = await Provider.of<RestaurantRepository>(context, listen: false).getAllRestaurants();
+    final plates = await PlateRepository().getAllPlates();
+    setState(() {
+      allRestaurants = restaurants;
+      allPlates = plates;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Explorar"),
+        backgroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SearchScreen(allPlates: allPlates, allRestaurants: allRestaurants),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionTitle(title: "RESTAURANTES CERCANOS"),
+            RestaurantsListView(restaurants: allRestaurants),
+            const SectionTitle(title: "HOT DEALS"),
+            PlatesListView(plates: allPlates),
+            const SectionTitle(title: "RECOMMENDATIONS"),
+            PlatesListView(plates: allPlates),
+            const SizedBox(height: 180),
+          ],
         ),
       ),
     );
