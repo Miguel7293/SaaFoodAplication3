@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../data/services/user_repository.dart';
+import '../../../data/models/user.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -8,10 +10,108 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
+  late Future<User> _userFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _userFuture = UserRepository().getAuthenticatedUser();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Column(children: [
-      Text("Settings Profile"),
-    ]);
+    return Scaffold(
+      appBar: AppBar(title: const Text("Perfil del Usuario")),
+      body: FutureBuilder<User>(
+        future: _userFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: Text("No se encontraron datos del usuario"));
+          }
+
+          final user = snapshot.data!;
+
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Imagen de perfil
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: user.profileImage.isNotEmpty
+                      ? NetworkImage(user.profileImage)
+                      : const AssetImage("assets/images/default_avatar.png") as ImageProvider,
+                  backgroundColor: Colors.grey[200],
+                ),
+                const SizedBox(height: 20),
+
+                // Nombre de usuario
+                Text(
+                  user.username,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 5),
+
+                // Correo electrónico
+                Text(
+                  user.email,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                ),
+                const SizedBox(height: 20),
+
+                // Tipo de usuario
+                _buildProfileInfo("Tipo de Usuario", user.typeUser),
+
+                // Fecha de creación
+                _buildProfileInfo("Cuenta creada el", "${user.createdAt.toLocal()}".split(' ')[0]),
+
+                const SizedBox(height: 20),
+
+                // Botón de Cerrar Sesión
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Aquí puedes agregar la lógica para cerrar sesión
+                  },
+                  icon: const Icon(Icons.exit_to_app),
+                  label: const Text("Cerrar Sesión"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// Widget para mostrar información con un título y valor
+  Widget _buildProfileInfo(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16, color: Colors.black54),
+          ),
+        ],
+      ),
+    );
   }
 }
