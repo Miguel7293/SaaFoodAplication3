@@ -26,16 +26,16 @@ class Rate {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'rate_id': rateId, // ✅ Puede ser null al insertar
-      'points': points,
-      'description': description,
-      'user_restaurant': userRestaurantId, // 🛠️ Corregido el nombre de la clave
-      'restaurant_id': restaurantId,
-      'created_at': createdAt.toIso8601String(),
-    };
-  }
+    Map<String, dynamic> toJson() {
+      return {
+        'rate_id': rateId, // ✅ Puede ser null al insertar
+        'points': points,
+        'description': description,
+        'user_restaurant': userRestaurantId, // 🛠️ Corregido el nombre de la clave
+        'restaurant_id': restaurantId,
+        'created_at': createdAt.toIso8601String(),
+      };
+    }
 
   // Método copyWith para actualizar campos
   Rate copyWith({

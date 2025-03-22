@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_example/data/models/plate.dart';
 import 'package:flutter_application_example/data/models/rate.dart';
-import 'package:flutter_application_example/data/services/plate_repository.dart';
 import 'package:flutter_application_example/data/services/rate_repository.dart';
 import 'package:flutter_application_example/data/services/user_repository.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +19,6 @@ class _PruevaScreenState extends State<PruevaScreen> {
   late RestaurantRepository _restaurantRepo;
   late UserRepository _userRepo;
   late RateRepository _rateRepo;
-  late PlateRepository _plateRepo;
   late String? _userId;
 
 
@@ -33,7 +30,6 @@ class _PruevaScreenState extends State<PruevaScreen> {
   }
 
   void _initializeRepositories() {
-    _plateRepo = Provider.of<PlateRepository>(context, listen: false);
     _cartaRepo = Provider.of<CartaRepository>(context, listen: false);
     _restaurantRepo = Provider.of<RestaurantRepository>(context, listen: false);
     _userRepo = Provider.of<UserRepository>(context, listen: false);
@@ -54,9 +50,6 @@ class _PruevaScreenState extends State<PruevaScreen> {
     
     // ================== SECCIÓN DE RATINGS ==================
     await _procesarRatings();
-
-    // ================== SECCIÓN DE PLATES ==================
-    await _procesarPlatos();
   }
 
   Future<void> _procesarCartas() async {
@@ -181,65 +174,6 @@ class _PruevaScreenState extends State<PruevaScreen> {
       _logError('RATINGS', e);
     }
   }
-
-  
-Future<void> _procesarPlatos() async {
-  debugPrint('\n🍲 INICIANDO GESTIÓN DE PLATOS 🍲');
-
-  try {
-    // 1. Obtener una carta de ejemplo válida
-    // Suponemos que usamos el ID de restaurante 21 para buscar cartas
-    const restaurantId = 21;
-    final cartas = await _cartaRepo.getCartasByRestaurant(restaurantId);
-
-    if (cartas.isEmpty) {
-      debugPrint('⛔ No hay cartas disponibles para el restaurante $restaurantId');
-      return;
-    }
-
-    final cartaEjemplo = cartas.first;
-    debugPrint('📋 Usando carta ID: ${cartaEjemplo.cartaId}');
-
-    // 2. Crear un nuevo plato (sin plateId, pues se generará en la BD)
-    final nuevoPlato = Plate(
-      name: 'Paella Valenciana',
-      description: 'Auténtica paella valenciana con mariscos',
-      price: 15.99,
-      available: true,
-      image: 'https://ejemplo.com/paella.jpg',
-      cartId: cartaEjemplo.cartaId, // Usamos el ID de la carta obtenida
-      category: 'Platos principales',
-    );
-
-    final platoCreado = await _plateRepo.addPlate(nuevoPlato);
-    debugPrint('🆕 Plato creado ID: ${platoCreado.plateId}');
-
-    // 3. Actualizar el plato: cambiar precio y descripción
-    final platoActualizado = await _plateRepo.updatePlate(
-      platoCreado.copyWith(
-        price: 17.99,
-        description: 'Actualizado: Paella con mariscos y alioli',
-      )
-    );
-
-    if (platoActualizado == null) {
-      debugPrint('❌ Error actualizando el plato');
-      return;
-    }
-    debugPrint('✏️ Plato actualizado: Nuevo precio ${platoActualizado.price}, Nueva descripción: ${platoActualizado.description}');
-
-    // 4. Eliminar el plato
-    final eliminado = await _plateRepo.deletePlate(platoActualizado.plateId!);
-    debugPrint(eliminado ? '🗑️ Plato eliminado' : '❌ Error eliminando plato');
-
-    // 5. Verificar: listar los platos restantes de la carta
-    final platosRestantes = await _plateRepo.getPlatesByCartaId(cartaEjemplo.cartaId);
-    _logColeccion('PLATOS RESTANTES', platosRestantes.length);
-
-  } catch (e) {
-    _logError('PLATOS', e);
-  }
-}
 
   // ================== HELPERS ==================
   void _logColeccion(String titulo, int cantidad) {

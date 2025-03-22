@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/data/services/plate_repository.dart';
 import 'package:flutter_application_example/data/services/rate_repository.dart';
 import 'package:flutter_application_example/data/services/user_repository.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -18,11 +19,11 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        Provider(create: (_) => CartaRepository()), 
-        Provider(create: (_) => RestaurantRepository()), 
+        Provider(create: (_) => CartaRepository()),
+        Provider(create: (_) => RestaurantRepository()),
         Provider(create: (_) => UserRepository()),
-        Provider(create: (_) => RateRepository()), // Agregar esto
-
+        Provider(create: (_) => RateRepository()),
+        Provider(create: (_) => PlateRepository()),
       ],
       child: const App(),
     ),
