@@ -39,4 +39,12 @@ class CartaProvider extends ChangeNotifier {
       }
     }
   }
+    void deletePlateFromCarta(int plateId) {
+    for (final entry in _platesByCarta.entries) {
+      final plates = entry.value;
+      plates.removeWhere((plate) => plate.plateId == plateId);
+      notifyListeners();
+    }
+  }
+
 }
