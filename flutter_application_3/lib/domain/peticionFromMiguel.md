@@ -1,8 +1,15 @@
- I need:
- - restaurants of the owner logueado 
- - carts of reataurants
- - plates of carts
- - add platos to carts
-
+- Miguel:
+ - restaurants of user - NO necesitamos
+ - carts of reataurants, (Id)
+ - plates of carts (id cartas)
+ - add platos to carts (new plate)
+ - add a column  with state in carta
+- Roger
+ - new rates
+ - edit rates
+ - edit restaurant (sintaxis "" ) - secundario
+- Paolo
+- Add new user 
+- encuesta google
 -----------------------------------------
 
