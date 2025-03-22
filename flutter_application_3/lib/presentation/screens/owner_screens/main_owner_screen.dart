@@ -59,6 +59,9 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
             if (snapshot.hasError) {
               return const Text('Error al cargar el nombre del restaurante');
             }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Text('Sin restaurante'); // Si no hay restaurantes
+            }
             final restaurantName = snapshot.data!.first.name;
             return Text(restaurantName); 
           },
