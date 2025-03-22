@@ -33,7 +33,7 @@ class RestaurantDetails extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.transparent,
                 blurRadius: 8,
               ),
             ],
