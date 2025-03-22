@@ -3,7 +3,7 @@
  - carts of reataurants, (Id)   (LISTO)
  - plates of carts (id cartas)  (LISTO)
  - add platos to carts (new plate) (LISTO)
- - add a column  with state in carta ()
+ - add a column  with state in carta (LISTO)
 - Roger
  - new rates (LISTO)
  - edit rates (LISTO)
