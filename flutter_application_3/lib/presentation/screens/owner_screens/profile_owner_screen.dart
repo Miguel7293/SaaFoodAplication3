@@ -144,11 +144,11 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
 
   /// Construye el contenido de la información del usuario
   Widget buildContent(User user) => Padding(
+
     padding: const EdgeInsets.all(16.0),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: profileHeight / 2), 
         Text(
           user.username,
           style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -164,6 +164,17 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
         _buildProfileInfo("Tipo de Usuario", user.typeUser),
         // Fecha de creación
         _buildProfileInfo("Cuenta creada el", "${user.createdAt.toLocal()}".split(' ')[0]),
+
+        _buildRestaurantInfo(
+        title: "Nombre del Restaurante",
+        value: (restaurant) => restaurant.name,
+        ),
+        _buildRestaurantInfo(
+        title: "Número de Celular",
+        value: (restaurant) => restaurant.contactNumber,
+        ),
+
+
         const SizedBox(height: 20),
         // Botón de Cerrar Sesión
         ElevatedButton.icon(
@@ -200,4 +211,27 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
       ),
     );
   }
+  Widget _buildRestaurantInfo({
+  required String title,
+  required String Function(Restaurant) value,
+}) {
+  return FutureBuilder<List<Restaurant>>(
+    future: _restaurantsFuture,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return _buildProfileInfo(title, "Cargando...");
+      }
+      if (snapshot.hasError) {
+        return _buildProfileInfo(title, "Error al cargar");
+      }
+      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        return _buildProfileInfo(title, "No disponible");
+      }
+
+      // Obtener el valor del restaurante usando la función `value`
+      final restaurantValue = value(snapshot.data!.first);
+      return _buildProfileInfo(title, restaurantValue);
+    },
+  );
+}
 }
