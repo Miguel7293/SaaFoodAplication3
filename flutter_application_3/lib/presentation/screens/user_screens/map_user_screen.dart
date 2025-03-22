@@ -14,26 +14,36 @@ class MapUserScreen extends StatefulWidget {
 }
 
 class _MapUserScreenState extends State<MapUserScreen> {
-  late GoogleMapController mapController;
+  GoogleMapController? _mapController;
   Position? _currentPosition;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
-  LatLng? _selectedRestaurant;
-  Restaurant? _restaurantDetails;
-  final LatLng _initialPosition = const LatLng(-15.8402, -70.0219);
-  final RestaurantRepository _restaurantRepo = RestaurantRepository();
-  final MapService _mapService = MapService();
+  Restaurant? _selectedRestaurant;
+  final _restaurantRepo = RestaurantRepository();
+  final _mapService = MapService();
+  final _initialPosition = const LatLng(-15.8402, -70.0219);
+  bool _isDisposed = false; // Flag para evitar setState() después de dispose
 
   @override
   void initState() {
     super.initState();
-    _getUserLocation();
-    _loadRestaurants();
+    _initializeMap();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _mapController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initializeMap() async {
+    await _getUserLocation();
+    await _loadRestaurants();
   }
 
   Future<void> _getUserLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
+    if (!await Geolocator.isLocationServiceEnabled()) return;
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -41,89 +51,122 @@ class _MapUserScreenState extends State<MapUserScreen> {
       if (permission == LocationPermission.deniedForever) return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(
+    final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
 
-    setState(() {
-      _currentPosition = position;
-    });
-
-    _addUserMarker();
-  }
-
-  void _addUserMarker() {
-    if (_currentPosition != null) {
+    if (mounted) {
       setState(() {
-        _markers.add(
-          Marker(
-            markerId: const MarkerId("current_location"),
-            position:
-                LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-            icon:
-                BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-            infoWindow: const InfoWindow(title: "Tu ubicación"),
-          ),
-        );
+        _currentPosition = position;
+        _markers.add(_createMarker(
+          "current_location",
+          LatLng(position.latitude, position.longitude),
+          "Tu ubicación",
+          BitmapDescriptor.hueBlue,
+        ));
       });
     }
   }
 
   Future<void> _loadRestaurants() async {
     try {
-      List<Restaurant> restaurants = await _restaurantRepo.getAllRestaurants();
-
-      setState(() {
-        _markers.addAll(
-          restaurants
-              .where((restaurant) => restaurant.coordinates != null)
-              .map((restaurant) {
-            final latLng = restaurant.coordinates!;
-
-            return Marker(
-              markerId: MarkerId(restaurant.restaurantId.toString()),
-              position: LatLng(latLng.latitude, latLng.longitude),
-              infoWindow: InfoWindow(
-                title: restaurant.name,
-                snippet: restaurant.category ?? "Sin categoría",
-              ),
-              onTap: () => _showRestaurantDetails(restaurant),
-            );
-          }),
-        );
-      });
+      final restaurants = await _restaurantRepo.getAllRestaurants();
+      if (mounted) {
+        setState(() {
+          _markers.addAll(restaurants
+              .where((r) => r.coordinates != null)
+              .map((r) => _createMarker(
+                  r.restaurantId.toString(),
+                  LatLng(r.coordinates!.latitude, r.coordinates!.longitude),
+                  r.name,
+                  BitmapDescriptor.hueRed,
+                  r)));
+        });
+      }
     } catch (e) {
       print("❌ Error al cargar restaurantes: $e");
     }
   }
 
-  void _showRestaurantDetails(Restaurant restaurant) {
-    if (_currentPosition == null) return;
-
-    final double distance = Geolocator.distanceBetween(
-      _currentPosition!.latitude,
-      _currentPosition!.longitude,
-      restaurant.coordinates!.latitude,
-      restaurant.coordinates!.longitude,
-    );
-
-    setState(() {
-      _selectedRestaurant = LatLng(
-        restaurant.coordinates!.latitude,
-        restaurant.coordinates!.longitude,
-      );
-      _restaurantDetails = restaurant;
-    });
-
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return _buildBottomSheet(distance);
-      },
+  Marker _createMarker(String id, LatLng position, String title, double hue,
+      [Restaurant? restaurant]) {
+    return Marker(
+      markerId: MarkerId(id),
+      position: position,
+      icon: BitmapDescriptor.defaultMarkerWithHue(hue),
+      infoWindow: InfoWindow(title: title),
+      onTap: restaurant != null ? () => _selectRestaurant(restaurant) : null,
     );
   }
 
-  Widget _buildBottomSheet(double distance) {
-    if (_restaurantDetails == null) return Container();
+  void _selectRestaurant(Restaurant restaurant) {
+    if (_currentPosition == null) return;
+
+    if (mounted) {
+      setState(() => _selectedRestaurant = restaurant);
+    }
+    
+    showModalBottomSheet(
+      context: context,
+      builder: (context) =>
+          RestaurantDetails(restaurant, _currentPosition!, _drawRoute),
+    );
+  }
+
+  Future<void> _drawRoute(LatLng destination) async {
+    if (_currentPosition == null || _isDisposed) return;
+
+    try {
+      final route = await _mapService.getRoute(
+          LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+          destination);
+
+      if (mounted) {
+        setState(() {
+          _polylines = {
+            Polyline(
+              polylineId: const PolylineId("route"),
+              color: Colors.blue,
+              width: 5,
+              points: route,
+            ),
+          };
+        });
+      }
+    } catch (e) {
+      print("❌ Error al obtener ruta: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Mapa de Restaurantes")),
+      body: GoogleMap(
+        initialCameraPosition: CameraPosition(target: _initialPosition, zoom: 14),
+        markers: _markers,
+        polylines: _polylines,
+        onMapCreated: (controller) => _mapController = controller,
+      ),
+    );
+  }
+}
+
+class RestaurantDetails extends StatelessWidget {
+  final Restaurant restaurant;
+  final Position userPosition;
+  final Function(LatLng) onNavigate;
+
+  const RestaurantDetails(this.restaurant, this.userPosition, this.onNavigate,
+      {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final distance = Geolocator.distanceBetween(
+      userPosition.latitude,
+      userPosition.longitude,
+      restaurant.coordinates!.latitude,
+      restaurant.coordinates!.longitude,
+    );
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -131,17 +174,14 @@ class _MapUserScreenState extends State<MapUserScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            _restaurantDetails!.name,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          Text(_restaurantDetails!.category ?? "Sin categoría"),
+          Text(restaurant.name,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(restaurant.category ?? "Sin categoría"),
           const SizedBox(height: 10),
           Text("Distancia: ${_formatDistance(distance)}"),
           const SizedBox(height: 10),
           Image.network(
-            _restaurantDetails!.imageOfLocal ??
-                "https://via.placeholder.com/400x200",
+            restaurant.imageOfLocal ?? "https://via.placeholder.com/400x200",
             height: 100,
             width: double.infinity,
             fit: BoxFit.cover,
@@ -151,11 +191,13 @@ class _MapUserScreenState extends State<MapUserScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ElevatedButton(
-                onPressed: _drawRouteToRestaurant,
-                child: const Text("Como Llegar"),
+                onPressed: () => onNavigate(LatLng(
+                    restaurant.coordinates!.latitude,
+                    restaurant.coordinates!.longitude)),
+                child: const Text("Cómo Llegar"),
               ),
               ElevatedButton(
-                onPressed: _openInGoogleMaps,
+                onPressed: () => _openInGoogleMaps(restaurant),
                 child: const Text("Abrir en Maps"),
               ),
             ],
@@ -165,54 +207,15 @@ class _MapUserScreenState extends State<MapUserScreen> {
     );
   }
 
-  String _formatDistance(double distance) {
+  static String _formatDistance(double distance) {
     return distance >= 1000
         ? "${(distance / 1000).toStringAsFixed(2)} km"
         : "${distance.toStringAsFixed(0)} m";
   }
 
-  Future<void> _drawRouteToRestaurant() async {
-    if (_currentPosition == null || _selectedRestaurant == null) return;
-
-    try {
-      List<LatLng> route = await _mapService.getRoute(
-        LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-        _selectedRestaurant!,
-      );
-
-      setState(() {
-        _polylines = {
-          Polyline(
-            polylineId: const PolylineId("route"),
-            color: Colors.blue,
-            width: 5,
-            points: route,
-          ),
-        };
-      });
-    } catch (e) {
-      print("❌ Error al obtener ruta: $e");
-    }
-  }
-
-  void _openInGoogleMaps() {
-    if (_selectedRestaurant == null) return;
+  static void _openInGoogleMaps(Restaurant restaurant) {
     final url =
-        "https://www.google.com/maps/search/?api=1&query=${_selectedRestaurant!.latitude},${_selectedRestaurant!.longitude}";
+        "https://www.google.com/maps/search/?api=1&query=${restaurant.coordinates!.latitude},${restaurant.coordinates!.longitude}";
     launchUrl(Uri.parse(url));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Mapa de Restaurantes")),
-      body: GoogleMap(
-        initialCameraPosition:
-            CameraPosition(target: _initialPosition, zoom: 14),
-        markers: _markers,
-        polylines: _polylines,
-        onMapCreated: (controller) => mapController = controller,
-      ),
-    );
   }
 }
