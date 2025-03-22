@@ -5,6 +5,8 @@ class AddDishesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String? selectedCategory;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Agregar Plato'),
@@ -20,9 +22,13 @@ class AddDishesScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             TextFormField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Ingrese el nombre del plato',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
               ),
             ),
             const SizedBox(height: 16),
@@ -33,9 +39,13 @@ class AddDishesScreen extends StatelessWidget {
             const SizedBox(height: 8),
             TextFormField(
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Ingrese la descripción del plato',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
               ),
             ),
             const SizedBox(height: 16),
@@ -46,14 +56,45 @@ class AddDishesScreen extends StatelessWidget {
             const SizedBox(height: 8),
             TextFormField(
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Ingrese el precio del plato',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+                prefixIcon: const Icon(Icons.attach_money, color: Color.fromARGB(255, 0, 0, 0)),
               ),
             ),
             const SizedBox(height: 16),
             const Text(
-              'Imagen:',
+              'Categoría:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              value: selectedCategory,
+              onChanged: (String? newValue) {
+                selectedCategory = newValue;
+              },
+              items: <String>['Mariscos', 'Carne', 'Pollo', 'Entrada']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Imagen Referencial:',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -61,7 +102,17 @@ class AddDishesScreen extends StatelessWidget {
               onPressed: () {
                 // Lógica para seleccionar una imagen
               },
-              child: const Text('Seleccionar Imagen'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              child: const Text(
+                'Seleccionar Imagen',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             const SizedBox(height: 24),
             Center(
@@ -69,7 +120,17 @@ class AddDishesScreen extends StatelessWidget {
                 onPressed: () {
                   // Lógica para guardar el plato
                 },
-                child: const Text('Guardar Plato'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                child: const Text(
+                  'Guardar Plato',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
               ),
             ),
           ],
