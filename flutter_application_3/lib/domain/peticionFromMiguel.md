@@ -11,5 +11,6 @@
 - Paolo
 - Add new user 
 - encuesta google
+- logOut
 -----------------------------------------
 

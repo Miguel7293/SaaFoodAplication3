@@ -4,6 +4,9 @@ import '../../../data/services/plate_repository.dart';
 import '../../../data/services/restaurant_repository.dart';
 import '../../widgets/plates_list_view.dart';
 import 'plus_dishes.dart';
+import '../../../data/models/user.dart';
+import '../../../data/services/user_repository.dart';
+import '../../../data/models/restaurant.dart'; 
 
 class OwnerHomeScreen extends StatefulWidget {
   const OwnerHomeScreen({super.key});
@@ -16,11 +19,50 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
   final PlateRepository plateRepository = PlateRepository();
   final RestaurantRepository restaurantRepository = RestaurantRepository();
 
+  Future<User> _ownerFuture = UserRepository().getAuthenticatedUser();
+  Future<List<Restaurant>>? _restaurantsFuture;  String? userUid;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  void _loadData() async {
+    try {
+      final user = await _ownerFuture;
+      setState(() {
+        userUid = user.userUid;
+      });
+
+      if (userUid != null) {
+        final restaurants = await restaurantRepository.getRestaurantsByAuthenticatedUser(userUid!);
+        setState(() {
+          _restaurantsFuture = Future.value(restaurants);
+        });
+      }
+    } catch (e) {
+      debugPrint("❌ Error al obtener usuario o restaurantes: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Name Of Restaurant'),
+        title: FutureBuilder<List<Restaurant>>(
+          future: _restaurantsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Cargando...'); // Muestra un texto mientras carga
+            }
+            if (snapshot.hasError) {
+              return const Text('Error al cargar el nombre del restaurante');
+            }
+            final restaurantName = snapshot.data!.first.name;
+            return Text(restaurantName); 
+          },
+        ),
       ),
       body: FutureBuilder(
         future: plateRepository.getAllPlates(), // Obtener platos desde Supabase
@@ -72,37 +114,36 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
     );
   }
 
-Widget _buildCategorySection(String title, List<Plate> plates, BuildContext context) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddDishesScreen(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add, size: 30),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        PlatesListView(plates: plates),
-      ],
-    ),
-  );
-}
-
+  Widget _buildCategorySection(String title, List<Plate> plates, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AddDishesScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.add, size: 30),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          PlatesListView(plates: plates),
+        ],
+      ),
+    );
+  }
 }

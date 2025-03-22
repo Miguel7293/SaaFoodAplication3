@@ -34,7 +34,7 @@ class RestaurantRepository {
   /// ```dart
   /// final restaurant = await restaurantRepository.getRestaurantById(5);
   /// ```
-  Future<Restaurant?> getRestaurantById(int restaurantId) async { // NOTE CHECKED YET
+  Future<Restaurant?> getRestaurantById(String restaurantId) async { // NOTE CHECKED YET
     final response = await _client
         .from('restaurants')
         .select()

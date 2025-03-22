@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../data/services/user_repository.dart';
 import '../../../data/models/user.dart';
+import '../../../data/services/restaurant_repository.dart'; 
+import '../../../data/models/restaurant.dart'; 
 
 class OwnerProfileScreen extends StatefulWidget {
   const OwnerProfileScreen({super.key});
@@ -10,15 +12,45 @@ class OwnerProfileScreen extends StatefulWidget {
 }
 
 class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
-  final double coverHeight = 280; // Altura de la imagen de portada
-  final double profileHeight = 144; // Altura del círculo de perfil
+  final double coverHeight = 280; 
+  final double profileHeight = 144; 
 
   Future<User> _ownerFuture = UserRepository().getAuthenticatedUser();
+  Future<List<Restaurant>>? _restaurantsFuture; 
+  String? userUid; 
 
   @override
   void initState() {
     super.initState();
-    _ownerFuture = UserRepository().getAuthenticatedUser();
+    _loadUserAndRestaurants(); 
+  }
+
+  void _loadUserAndRestaurants() async {
+    try {
+      // Obtener el usuario autenticado
+      final user = await _ownerFuture;
+      setState(() {
+        userUid = user.userUid; 
+      });
+
+      if (userUid != null) {
+        final restaurants = await RestaurantRepository().getRestaurantsByAuthenticatedUser(userUid!);
+        setState(() {
+          _restaurantsFuture = Future.value(restaurants);
+        });
+
+        if (restaurants.isNotEmpty) {
+          debugPrint("✅ Restaurantes cargados correctamente:");
+          for (final restaurant in restaurants) {
+            debugPrint("Nombre: ${restaurant.name}, ID: ${restaurant.restaurantId}");
+          }
+        } else {
+          debugPrint("⚠️ No se encontraron restaurantes para el userUid: $userUid");
+        }
+      }
+    } catch (e) {
+      debugPrint("❌ Error al obtener usuario o restaurantes: $e");
+    }
   }
 
   @override
@@ -42,9 +74,7 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
           return ListView(
             padding: EdgeInsets.zero,
             children: [
-              // Sección superior con la imagen de portada y perfil
               buildTop(user),
-              // Contenido de la información del usuario
               buildContent(user),
             ],
           );
@@ -53,31 +83,45 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
     );
   }
 
-  /// Construye la imagen de portada
-  Widget buildCoverImage(User user) => Container(
-    color: Colors.grey,
-    child: Image.network(
-      user.profileImage.isNotEmpty
-          ? user.profileImage
-          : 'https://w.wallhaven.cc/full/o3/wallhaven-o3715l.png', // Imagen por defecto
-      width: double.infinity,
-      height: coverHeight,
-      fit: BoxFit.cover,
-    ),
+  Widget buildCoverImage(User user) => FutureBuilder<List<Restaurant>>(
+    future: _restaurantsFuture,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator()); 
+      }
+      if (snapshot.hasError) {
+        return Center(child: Text("Error: ${snapshot.error}"));
+      }
+
+      final restaurants = snapshot.data;
+      final imageUrl = restaurants?.isNotEmpty == true
+          ? restaurants!.first.imageOfLocal 
+          : user.profileImage; 
+
+      return Container(
+        color: Colors.grey,
+        child: Image.network(
+          imageUrl?.isNotEmpty == true
+              ? imageUrl!
+              : 'https://w.wallhaven.cc/full/o3/wallhaven-o3715l.png', 
+          width: double.infinity,
+          height: coverHeight,
+          fit: BoxFit.cover,
+        ),
+      );
+    },
   );
 
-  /// Construye la imagen de perfil
   Widget buildProfileImage(User user) => CircleAvatar(
     radius: profileHeight / 2,
     backgroundColor: Colors.grey.shade800,
     backgroundImage: NetworkImage(
       user.profileImage.isNotEmpty
           ? user.profileImage
-          : 'https://w.wallhaven.cc/full/1p/wallhaven-1pk8r9.jpg', // Imagen por defecto
+          : 'https://w.wallhaven.cc/full/1p/wallhaven-1pk8r9.jpg', 
     ),
   );
 
-  /// Construye la sección superior (portada + perfil)
   Widget buildTop(User user) {
     final bottom = profileHeight / 2;
     final top = coverHeight - profileHeight / 2;
@@ -104,8 +148,7 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: profileHeight / 2), // Espacio para el perfil
-        // Nombre de usuario
+        SizedBox(height: profileHeight / 2), 
         Text(
           user.username,
           style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -139,7 +182,6 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
     ),
   );
 
-  /// Widget para mostrar información con un título y valor
   Widget _buildProfileInfo(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
