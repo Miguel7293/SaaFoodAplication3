@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../config/supabase/supabase_config.dart';
 import '../models/restaurant.dart';
 
@@ -45,4 +47,29 @@ class RestaurantRepository {
       return null;
     }
   }
+
+
+Future<List<Restaurant>> getRestaurantsByAuthenticatedUser(String userUid) async {
+  try {
+    debugPrint("🔍 Buscando restaurantes para el UID: $userUid");
+
+    final response = await _client
+        .from('restaurants')
+        .select()
+        .eq('id_dueno', userUid);
+
+    if (response != null && response is List) {
+      final restaurants = response.map((json) => Restaurant.fromJson(json)).toList();
+      debugPrint("✅ Restaurantes obtenidos: ${restaurants.length}");
+      return restaurants;
+    } else {
+      debugPrint("⚠️ No se encontraron restaurantes.");
+      return [];
+    }
+  } catch (e) {
+    debugPrint("❌ Error en getRestaurantsByAuthenticatedUser: $e");
+    return [];
+  }
+}
+
 }

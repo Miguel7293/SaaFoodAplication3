@@ -78,6 +78,42 @@ class _PruevaScreenState extends State<PruevaScreen> {
     } catch (e){
       debugPrint("Error al obtener usuario: $e");
     }
+
+
+        // Obtener un restaurante por ID
+    try {
+      const restaurantId = 4;
+      final restaurant = await _restaurantRepo.getRestaurantById(restaurantId);
+
+      if (restaurant != null) {
+        debugPrint("Restaurante encontrado ----->");
+        debugPrint("ID: ${restaurant.restaurantId}, Nombre: ${restaurant.name}, Ubicación: ${restaurant.location}, Contacto: ${restaurant.contactNumber}, Horario: ${restaurant.horario}, Estado: ${restaurant.state}, Dueño: ${restaurant.idDueno}, Creado: ${restaurant.createdAt}");
+      } else {
+        debugPrint("No se encontró el restaurante con ID: $restaurantId");
+      }
+    } catch (e) {
+      debugPrint("Error al obtener restaurante por ID: $e");
+    }
+
+    try {
+    // Obtener el usuario autenticado
+    final user = await _userRepo.getAuthenticatedUser();
+    final userUid = user.userUid; 
+
+    debugPrint("Usuario Autenticado ----->");
+    debugPrint("UID: $userUid, Email: ${user.email}, Nombre: ${user.username}");
+
+    // Obtener los restaurantes relacionados con el usuario autenticado
+    final restaurants = await _restaurantRepo.getRestaurantsByAuthenticatedUser(userUid);
+
+    debugPrint("Restaurantes del Usuario ----->");
+    for (var restaurant in restaurants) {
+      debugPrint("ID: ${restaurant.restaurantId}, Nombre: ${restaurant.name}, Ubicación: ${restaurant.location}, Contacto: ${restaurant.contactNumber}");
+    }
+    } catch (e) {
+      debugPrint("Error al obtener restaurantes del usuario autenticado: $e");
+    }
+
   }
 
   @override
