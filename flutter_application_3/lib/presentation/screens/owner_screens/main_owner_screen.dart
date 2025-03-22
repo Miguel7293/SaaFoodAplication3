@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/presentation/widgets/plates_list_view_owner.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_example/data/services/carta_repository.dart';
 import 'package:flutter_application_example/data/models/carta.dart';
 import 'package:flutter_application_example/data/services/plate_repository.dart';
 import 'package:flutter_application_example/data/models/plate.dart';
 import 'package:flutter_application_example/data/services/restaurant_repository.dart';
-import 'package:flutter_application_example/data/services/user_repository.dart';
 import 'package:flutter_application_example/presentation/providers/auth_provider.dart';
+import 'package:flutter_application_example/presentation/providers/carta_notifier.dart';
 import 'package:flutter_application_example/data/models/restaurant.dart';
 import '../../../presentation/screens/owner_screens/plus_dishes.dart'; 
-import '../../widgets/plates_list_view.dart';
+import '../../../presentation/screens/owner_screens/edit_menu_owner.dart';
 
 class OwnerHomeScreen extends StatefulWidget {
   const OwnerHomeScreen({super.key});
@@ -22,15 +23,8 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
   late CartaRepository _cartaRepo;
   late PlateRepository _plateRepo;
   late RestaurantRepository _restaurantRepo;
-  late UserRepository _userRepo;
   late String? _userId;
-  List<Carta> _cartas = [];
-  int? _restaurantId;
-  Map<int, List<Plate>> _platesByCarta = {}; // Mapa para almacenar platos por carta
-
-  // Listas separadas para cartas activas e inactivas
-  List<Carta> _cartasActivas = [];
-  List<Carta> _cartasInactivas = [];
+  late CartaProvider _cartaProvider;
 
   @override
   void initState() {
@@ -42,14 +36,13 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Aquí puedes realizar acciones que requieran un contexto válido
   }
 
   void _initializeRepositories() {
     _plateRepo = Provider.of<PlateRepository>(context, listen: false);
     _cartaRepo = Provider.of<CartaRepository>(context, listen: false);
     _restaurantRepo = Provider.of<RestaurantRepository>(context, listen: false);
-    _userRepo = Provider.of<UserRepository>(context, listen: false);
+    _cartaProvider = Provider.of<CartaProvider>(context, listen: false);
     _userId = Provider.of<AuthProvider>(context, listen: false).userId;
   }
 
@@ -58,39 +51,22 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
       if (_userId == null) {
         throw Exception("El ID del usuario no es válido: $_userId");
       }
-
-      // Obtener todos los restaurantes asociados al usuario
       final restaurants = await _restaurantRepo.getRestaurantsByAuthenticatedUser(_userId!);
 
       if (restaurants.isEmpty) {
         throw Exception("El usuario no tiene restaurantes asociados.");
       }
 
-      // Obtener el ID del primer restaurante asociado al usuario
       final restaurantId = restaurants.first.restaurantId;
-
-      // Obtener las cartas del restaurante
       final cartas = await _cartaRepo.getCartasByRestaurant(restaurantId);
-
-      // Obtener los platos para cada carta
       final platesByCarta = <int, List<Plate>>{};
       for (final carta in cartas) {
-        final plates = await _plateRepo.getPlatesByCartaId(carta.cartaId!); 
-        platesByCarta[carta.cartaId!] = plates;
+        final plates = await _plateRepo.getPlatesByCartaId(carta.cartaId); 
+        platesByCarta[carta.cartaId] = plates;
       }
 
-      // Filtrar cartas activas e inactivas
-      final cartasActivas = cartas.where((carta) => carta.state == true).toList();
-      final cartasInactivas = cartas.where((carta) => carta.state == false).toList();
-
-      // Actualizar el estado con los datos obtenidos
-      setState(() {
-        _restaurantId = restaurantId;
-        _cartas = cartas;
-        _platesByCarta = platesByCarta;
-        _cartasActivas = cartasActivas;
-        _cartasInactivas = cartasInactivas;
-      });
+      _cartaProvider.setCartas(cartas);
+      _cartaProvider.setPlatesByCarta(platesByCarta);
 
       debugPrint("Datos cargados correctamente");
     } catch (e) {
@@ -129,26 +105,33 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
           },
         ),
       ),
-      body: _cartas.isEmpty
-          ? const Center(child: Text("No hay cartas disponibles."))
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Sección de Cartas Activas
-                  if (_cartasActivas.isNotEmpty)
-                    _buildCartaSection("Cartas Activas", _cartasActivas),
+      body: Consumer<CartaProvider>(
+        builder: (context, cartaProvider, child) {
+          final cartas = cartaProvider.cartas;
+          final platesByCarta = cartaProvider.platesByCarta;
+          final cartasActivas = cartas.where((carta) => carta.state == true).toList();
+          final cartasInactivas = cartas.where((carta) => carta.state == false).toList();
 
-                  // Sección de Cartas Inactivas
-                  if (_cartasInactivas.isNotEmpty)
-                    _buildCartaSection("Cartas Inactivas", _cartasInactivas),
-                ],
-              ),
-            ),
+          return cartas.isEmpty
+              ? const Center(child: Text("No hay cartas disponibles."))
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (cartasActivas.isNotEmpty)
+                        _buildCartaSection("Cartas Activas", cartasActivas, platesByCarta),
+
+                      if (cartasInactivas.isNotEmpty)
+                        _buildCartaSection("Cartas Desactivadas", cartasInactivas, platesByCarta),
+                    ],
+                  ),
+                );
+        },
+      ),
     );
   }
 
-  Widget _buildCartaSection(String title, List<Carta> cartas) {
+  Widget _buildCartaSection(String title, List<Carta> cartas, Map<int, List<Plate>> platesByCarta) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -161,27 +144,44 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: cartas.length,
             itemBuilder: (context, index) {
               final carta = cartas[index];
-              final plates = _platesByCarta[carta.cartaId] ?? [];
+              final plates = platesByCarta[carta.cartaId] ?? [];
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    carta.type ?? 'Sin nombre',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+              return GestureDetector(
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditMenuOwnerScreen(carta: carta),
                     ),
-                  ),
-                  _buildCategorySection("Platos", plates, context),
-                ],
+                  );
+
+                  if (result == true) {
+                    _loadData();
+                  }
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        carta.type,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    _buildCategorySection("Platos", plates, carta, context),
+                  ],
+                ),
               );
             },
           ),
@@ -190,7 +190,10 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
     );
   }
 
-  Widget _buildCategorySection(String title, List<Plate> plates, BuildContext context) {
+  Widget _buildCategorySection(String title, List<Plate> plates, Carta carta, BuildContext context) {
+    final sortedPlates = List<Plate>.from(plates)
+      ..sort((a, b) => b.available ? 1 : -1);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -203,21 +206,26 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                 title,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddDishesScreen(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.add, size: 30),
-              ),
+              if (!carta.state)
+                IconButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddDishesScreen(cartaId: carta.cartaId),
+                      ),
+                    );
+
+                    if (result == true) {
+                      _loadData();
+                    }
+                  },
+                  icon: const Icon(Icons.add, size: 30),
+                ),
             ],
           ),
           const SizedBox(height: 10),
-          PlatesListView(plates: plates),
+          PlatesListViewOwner(plates: sortedPlates), 
         ],
       ),
     );

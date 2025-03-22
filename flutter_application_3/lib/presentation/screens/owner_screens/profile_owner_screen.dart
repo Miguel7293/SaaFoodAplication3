@@ -83,7 +83,7 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
         child: Image.network(
           imageUrl?.isNotEmpty == true
               ? imageUrl!
-              : 'https://w.wallhaven.cc/full/o3/wallhaven-o3715l.png', 
+              : 'https://wallhaven.cc/w/rdmo8m', 
           width: double.infinity,
           height: coverHeight,
           fit: BoxFit.cover,
@@ -98,7 +98,7 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
     backgroundImage: NetworkImage(
       user.profileImage.isNotEmpty
           ? user.profileImage
-          : 'https://w.wallhaven.cc/full/1p/wallhaven-1pk8r9.jpg', 
+          : 'https://wallhaven.cc/w/rdmo8m', 
     ),
   );
 

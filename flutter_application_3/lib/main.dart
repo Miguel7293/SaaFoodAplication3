@@ -8,6 +8,8 @@ import 'config/supabase/supabase_config.dart';
 import 'data/services/carta_repository.dart';
 import 'data/services/restaurant_repository.dart';
 import 'presentation/providers/auth_provider.dart';
+import 'presentation/providers/carta_notifier.dart';
+
 import 'app/app.dart';
 
 void main() async {
@@ -24,6 +26,9 @@ void main() async {
         Provider(create: (_) => UserRepository()),
         Provider(create: (_) => RateRepository()),
         Provider(create: (_) => PlateRepository()),
+
+        ChangeNotifierProvider(create: (_) => CartaProvider()),
+
       ],
       child: const App(),
     ),

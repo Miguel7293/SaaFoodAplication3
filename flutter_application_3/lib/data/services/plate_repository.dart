@@ -11,6 +11,19 @@ class PlateRepository {
     return (response as List).map((e) => Plate.fromJson(e)).toList();
   }
 
+  Future<Plate> getPlateById(int plateId) async {
+    try {
+      final response = await _client
+          .from('plates')
+          .select()
+          .eq('plate_id', plateId)
+          .single(); 
+      return Plate.fromJson(response);
+    } catch (e) {
+      debugPrint('❌ Error obteniendo el plato por ID: $e');
+      throw Exception('No se pudo obtener el plato con ID: $plateId');
+    }
+  }
   Future<List<Plate>> getPlatesByCartaId(int cartaId) async {
     final response = await _client
         .from('plates')
