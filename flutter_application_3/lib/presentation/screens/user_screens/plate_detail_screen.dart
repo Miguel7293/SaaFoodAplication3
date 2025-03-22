@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_example/data/models/plate.dart';
-import '../../../core/constants/main_colors.dart';
+import 'package:flutter_application_example/presentation/theme/styles.dart';
 
 class PlateDetailScreen extends StatelessWidget {
   final Plate plate; 
@@ -14,17 +14,12 @@ class PlateDetailScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.network(plate.image,
-              width: double.infinity, height: 200, fit: BoxFit.cover),
-          const SizedBox(height: 10),
+          AppStyles.detailImage(plate.image),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
               plate.name,
-              style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.descriptionPrimary),
+              style: AppStyles.tittleTextStyle,
             ),
           ),
           Padding(
@@ -38,7 +33,7 @@ class PlateDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               "Precio: S/. ${plate.price.toStringAsFixed(2)}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: AppStyles.secondaryTextStyle,
             ),
           ),
           Center(
@@ -46,12 +41,7 @@ class PlateDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: () {},
-                style: ButtonStyle(
-                  backgroundColor:
-                      WidgetStateProperty.all(AppColors.descriptionPrimary),
-                  foregroundColor: WidgetStateProperty.all(
-                      Colors.white),
-                ),
+                style: AppStyles.primaryButtonStyle,
                 child: Text("Ir a Restaurante"),
               ),
             ),

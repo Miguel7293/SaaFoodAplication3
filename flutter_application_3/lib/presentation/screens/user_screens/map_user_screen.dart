@@ -30,11 +30,45 @@ class _MapUserScreenState extends State<MapUserScreen> {
 
     showModalBottomSheet(
       context: context,
-      builder: (context) => RestaurantDetails(
-        restaurant,
-        _mapController.getCurrentPosition()!,
-        _mapController.drawRoute,
-      ),
+      isScrollControlled: true,
+      backgroundColor:
+          Colors.transparent, // Fondo transparente para evitar bloqueos
+      isDismissible: true,
+      enableDrag: true,
+      builder: (context) {
+        return Stack(
+          children: [
+            // Detector para cerrar el modal al tocar fuera
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                  color: Colors.transparent), // Fondo sin interferencias
+            ),
+
+            // Hoja deslizable
+            DraggableScrollableSheet(
+              initialChildSize: 0.5,
+              minChildSize: 0.3,
+              maxChildSize: 0.9,
+              builder: (context, scrollController) {
+                return ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: Container(
+                    color: Colors.transparent, // Color sólido para el fondo del modal
+                    child: RestaurantDetails(
+                      restaurant,
+                      _mapController.getCurrentPosition()!,
+                      _mapController.drawRoute,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

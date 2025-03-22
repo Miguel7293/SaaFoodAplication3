@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_example/data/models/restaurant.dart';
 import 'package:flutter_application_example/data/services/carta_repository.dart';
 import 'package:flutter_application_example/data/services/plate_repository.dart';
+import 'package:flutter_application_example/presentation/theme/styles.dart';
 import 'package:flutter_application_example/presentation/widgets/plates_list_view.dart';
 import '../../../../core/constants/main_colors.dart';
 import '../../../../data/models/carta.dart';
@@ -39,12 +40,7 @@ class RestDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Imagen del restaurante
-                Image.network(
-                  res.imageOfLocal ?? "https://e1.pngegg.com/pngimages/555/986/png-clipart-media-filetypes-jpg-icon-thumbnail.png",
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                ),
+                AppStyles.detailImage(res.imageOfLocal),
 
                 Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -54,7 +50,7 @@ class RestDetailScreen extends StatelessWidget {
                       // Nombre y categoría
                       Text(
                         res.name,
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        style: AppStyles.tittleTextStyle,
                       ),
                       const SizedBox(height: 5),
                       Row(
@@ -62,7 +58,7 @@ class RestDetailScreen extends StatelessWidget {
                           const Icon(Icons.restaurant, size: 20, color: Colors.grey),
                           const SizedBox(width: 5),
                           Text(res.category ?? "Categoría desconocida",
-                              style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                              style: AppStyles.secondaryTextStyle),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -72,7 +68,7 @@ class RestDetailScreen extends StatelessWidget {
                         children: [
                           const Icon(Icons.schedule, size: 20, color: Colors.grey),
                           const SizedBox(width: 5),
-                          Text(res.horario, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                          Text(res.horario, style: AppStyles.secondaryTextStyle),
                           const SizedBox(width: 10),
                           Text(
                             res.state ?? "Estado desconocido",
