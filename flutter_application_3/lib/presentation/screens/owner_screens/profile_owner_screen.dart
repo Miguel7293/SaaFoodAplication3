@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../data/services/user_repository.dart';
 import '../../../data/models/user.dart';
 import '../../../data/services/restaurant_repository.dart'; 
 import '../../../data/models/restaurant.dart'; 
+import '../../../presentation/providers/auth_provider.dart';
 
 class OwnerProfileScreen extends StatefulWidget {
   const OwnerProfileScreen({super.key});
@@ -12,52 +14,30 @@ class OwnerProfileScreen extends StatefulWidget {
 }
 
 class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
+  late RestaurantRepository _restaurantRepo;
+  late UserRepository _userRepo;
+  late String? _userId;
+
   final double coverHeight = 280; 
   final double profileHeight = 144; 
-
-  Future<User> _ownerFuture = UserRepository().getAuthenticatedUser();
-  Future<List<Restaurant>>? _restaurantsFuture; 
-  String? userUid; 
 
   @override
   void initState() {
     super.initState();
-    _loadUserAndRestaurants(); 
+    _initializeRepositories();
   }
 
-  void _loadUserAndRestaurants() async {
-    try {
-      // Obtener el usuario autenticado
-      final user = await _ownerFuture;
-      setState(() {
-        userUid = user.userUid; 
-      });
-
-      if (userUid != null) {
-        final restaurants = await RestaurantRepository().getRestaurantsByAuthenticatedUser(userUid!);
-        setState(() {
-          _restaurantsFuture = Future.value(restaurants);
-        });
-
-        if (restaurants.isNotEmpty) {
-          debugPrint("✅ Restaurantes cargados correctamente:");
-          for (final restaurant in restaurants) {
-            debugPrint("Nombre: ${restaurant.name}, ID: ${restaurant.restaurantId}");
-          }
-        } else {
-          debugPrint("⚠️ No se encontraron restaurantes para el userUid: $userUid");
-        }
-      }
-    } catch (e) {
-      debugPrint("❌ Error al obtener usuario o restaurantes: $e");
-    }
+  void _initializeRepositories() {
+    _restaurantRepo = Provider.of<RestaurantRepository>(context, listen: false);
+    _userRepo = Provider.of<UserRepository>(context, listen: false);
+    _userId = Provider.of<AuthProvider>(context, listen: false).userId;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder<User>(
-        future: _ownerFuture,
+        future: _userRepo.getAuthenticatedUser(), // Llamada directa al repositorio
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -84,7 +64,7 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
   }
 
   Widget buildCoverImage(User user) => FutureBuilder<List<Restaurant>>(
-    future: _restaurantsFuture,
+    future: _restaurantRepo.getRestaurantsByAuthenticatedUser(_userId!), // Llamada directa al repositorio
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const Center(child: CircularProgressIndicator()); 
@@ -142,9 +122,7 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
     );
   }
 
-  /// Construye el contenido de la información del usuario
   Widget buildContent(User user) => Padding(
-
     padding: const EdgeInsets.all(16.0),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -154,29 +132,24 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
           style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        // Correo electrónico
         Text(
           user.email,
           style: TextStyle(fontSize: 20, color: Colors.black54),
         ),
         const SizedBox(height: 20),
-        // Tipo de usuario
         _buildProfileInfo("Tipo de Usuario", user.typeUser),
-        // Fecha de creación
         _buildProfileInfo("Cuenta creada el", "${user.createdAt.toLocal()}".split(' ')[0]),
 
         _buildRestaurantInfo(
-        title: "Nombre del Restaurante",
-        value: (restaurant) => restaurant.name,
+          title: "Nombre del Restaurante",
+          value: (restaurant) => restaurant.name,
         ),
         _buildRestaurantInfo(
-        title: "Número de Celular",
-        value: (restaurant) => restaurant.contactNumber,
+          title: "Número de Celular",
+          value: (restaurant) => restaurant.contactNumber,
         ),
 
-
         const SizedBox(height: 20),
-        // Botón de Cerrar Sesión
         ElevatedButton.icon(
           onPressed: () {
             // Lógica para cerrar sesión
@@ -211,27 +184,27 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
       ),
     );
   }
-  Widget _buildRestaurantInfo({
-  required String title,
-  required String Function(Restaurant) value,
-}) {
-  return FutureBuilder<List<Restaurant>>(
-    future: _restaurantsFuture,
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return _buildProfileInfo(title, "Cargando...");
-      }
-      if (snapshot.hasError) {
-        return _buildProfileInfo(title, "Error al cargar");
-      }
-      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-        return _buildProfileInfo(title, "No disponible");
-      }
 
-      // Obtener el valor del restaurante usando la función `value`
-      final restaurantValue = value(snapshot.data!.first);
-      return _buildProfileInfo(title, restaurantValue);
-    },
-  );
-}
+  Widget _buildRestaurantInfo({
+    required String title,
+    required String Function(Restaurant) value,
+  }) {
+    return FutureBuilder<List<Restaurant>>(
+      future: _restaurantRepo.getRestaurantsByAuthenticatedUser(_userId!), // Llamada directa al repositorio
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildProfileInfo(title, "Cargando...");
+        }
+        if (snapshot.hasError) {
+          return _buildProfileInfo(title, "Error al cargar");
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return _buildProfileInfo(title, "No disponible");
+        }
+
+        final restaurantValue = value(snapshot.data!.first);
+        return _buildProfileInfo(title, restaurantValue);
+      },
+    );
+  }
 }
