@@ -21,34 +21,34 @@ class Plate {
 
   factory Plate.fromJson(Map<String, dynamic> json) {
     return Plate(
-      plateId: json['plate_id'] as int?, // Puede ser nulo al insertar
-      name: json['name'] as String,
-      description: json['description'] as String,
-      price: (json['price'] as num).toDouble(),
-      available: json['available'] as bool,
-      image: json['image'] as String,
-      cartId: json['cart_id'] as int,
-      category: json['category'] as String,
+      plateId: json['plate_id'] as int? ?? 0,
+      name: json['name'] as String? ?? 'Sin nombre',
+      description: json['description'] as String? ?? 'Sin descripción',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      available: json['available'] as bool? ?? false,
+      image: json['image'] as String? ?? 'https://via.placeholder.com/150',
+      cartId: json['cart_id'] as int? ?? 0,
+      category: json['category'] as String? ?? 'Sin categoría',
     );
   }
 
-Map<String, dynamic> toJson() {
-  final data = <String, dynamic>{
-    'name': name,
-    'description': description,
-    'price': price,
-    'available': available,
-    'image': image,
-    'cart_id': cartId,
-    'category': category,
-  };
-  
-  if (plateId != null && plateId != 0) {
-    data['plate_id'] = plateId;
+  Map<String, dynamic> toJson() {
+    final data = <String, dynamic>{
+      'name': name,
+      'description': description,
+      'price': price,
+      'available': available,
+      'image': image,
+      'cart_id': cartId,
+      'category': category,
+    };
+
+    if (plateId != null && plateId != 0) {
+      data['plate_id'] = plateId;
+    }
+
+    return data;
   }
-  
-  return data;
-}
 
   // Método copyWith para actualizar campos, siguiendo el patrón de Rate
   Plate copyWith({
