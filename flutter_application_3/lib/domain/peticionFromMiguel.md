@@ -1,19 +1,17 @@
 - Miguel:
- - restaurants of user - NO necesitamos    (listo)
- - carts of reataurants, (Id)
- - plates of carts (id cartas)
- - add platos to carts (new plate)
- - add a column  with state in carta
+ - restaurants of user - NO necesitamos (LISTO)
+ - carts of reataurants, (Id)   (LISTO)
+ - plates of carts (id cartas)  (LISTO)
+ - add platos to carts (new plate) (LISTO)
+ - add a column  with state in carta ()
 - Roger
- - new rates ()
- - edit rates
+ - new rates (LISTO)
+ - edit rates (LISTO)
  - edit restaurant (sintaxis "" ) - secundario
 - Paolo
-- Add new user 
-- encuesta google
-- logOut
  - Add new user 
  - encuesta google
+ - logOut
  - limitar rates a  por persona
 -----------------------------------------
 
