@@ -9,6 +9,9 @@ import '../data/services/carta_repository.dart';
 import '../data/services/restaurant_repository.dart';
 import '../presentation/providers/auth_provider.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 class PruevaScreen extends StatefulWidget {
   const PruevaScreen({super.key});
 
@@ -28,9 +31,10 @@ class _PruevaScreenState extends State<PruevaScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeRepositories();
-    cargarDatos();
+    //_initializeRepositories();
+    //cargarDatos();
   }
+
 
   void _initializeRepositories() {
     _plateRepo = Provider.of<PlateRepository>(context, listen: false);
@@ -57,6 +61,7 @@ class _PruevaScreenState extends State<PruevaScreen> {
 
     // ================== SECCIÓN DE PLATES ==================
     await _procesarPlatos();
+    
   }
 
   Future<void> _procesarCartas() async {
@@ -121,6 +126,8 @@ class _PruevaScreenState extends State<PruevaScreen> {
     } catch (e) {
       _logError('USUARIO', e);
     }
+
+    
   }
 
   Future<void> _procesarRatings() async {

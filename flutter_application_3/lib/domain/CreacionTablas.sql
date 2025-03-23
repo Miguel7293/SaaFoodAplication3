@@ -30,7 +30,8 @@ CREATE TABLE carta (
     type VARCHAR(50) NOT NULL, -- Ejemplo: bebida, comida
     description TEXT,
     rest_cart INT NOT NULL REFERENCES restaurants(restaurant_id), -- Relación con restaurante
-    updated_at TIMESTAMP DEFAULT NOW() -- Última actualización
+    updated_at TIMESTAMP DEFAULT NOW(), -- Última actualización
+    state bool default false
 );
 
 -- Crear tabla de platos
@@ -49,9 +50,11 @@ CREATE TABLE rates (
     rate_id SERIAL PRIMARY KEY,
     points INT CHECK (points BETWEEN 1 AND 5), -- Puntuación entre 1 y 5
     description TEXT,
-    user_restaurant INT NOT NULL REFERENCES users(user_id), -- Usuario que califica
+    user_restaurant UUid NOT NULL REFERENCES users(user_uid), -- Usuario que califica
     restaurant_id INT NOT NULL REFERENCES restaurants(restaurant_id), -- Restaurante calificado
     created_at TIMESTAMP DEFAULT NOW() -- Fecha de la calificación
+
+    //agrega unique en restaurant_id con user_restaurant
 );
 
 
