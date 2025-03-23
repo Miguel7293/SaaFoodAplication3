@@ -10,6 +10,7 @@ import '../presentation/providers/auth_provider.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/signup_screen.dart';
 
+
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -27,7 +28,9 @@ class App extends StatelessWidget {
           '/owner': (context) => const MainOwnerNavBar(), // dueño
           '/choosing-role': (context) => const ChoosingRoleScreen(),
           '/owner-survey': (context) => const OwnerSurveyScreen(),
-          '/waiting-approval': (context) => const WaitingApprovalScreen()
+          '/waiting-approval': (context) => const WaitingApprovalScreen(),
+
+
         },
       ),
     );
