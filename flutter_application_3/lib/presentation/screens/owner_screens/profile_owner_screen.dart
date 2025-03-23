@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../data/services/user_repository.dart';
 import '../../../data/models/user.dart';
 import '../../../data/services/restaurant_repository.dart'; 
@@ -78,16 +79,13 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
           ? restaurants!.first.imageOfLocal 
           : user.profileImage; 
 
-      return Container(
-        color: Colors.grey,
-        child: Image.network(
-          imageUrl?.isNotEmpty == true
-              ? imageUrl!
-              : 'https://wallhaven.cc/w/rdmo8m', 
-          width: double.infinity,
-          height: coverHeight,
-          fit: BoxFit.cover,
-        ),
+      return CachedNetworkImage(
+        imageUrl: imageUrl?.isNotEmpty == true ? imageUrl! : 'https://wallhaven.cc/w/rdmo8m',
+        width: double.infinity,
+        height: coverHeight,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) => Icon(Icons.error),
       );
     },
   );
@@ -95,7 +93,7 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
   Widget buildProfileImage(User user) => CircleAvatar(
     radius: profileHeight / 2,
     backgroundColor: Colors.grey.shade800,
-    backgroundImage: NetworkImage(
+    backgroundImage: CachedNetworkImageProvider(
       user.profileImage.isNotEmpty
           ? user.profileImage
           : 'https://wallhaven.cc/w/rdmo8m', 

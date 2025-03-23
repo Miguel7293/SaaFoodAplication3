@@ -46,5 +46,11 @@ class CartaProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
+  void updateCarta(Carta carta) {
+    final index = _cartas.indexWhere((c) => c.cartaId == carta.cartaId);
+    if (index != -1) {
+      _cartas[index] = carta;
+      notifyListeners();
+    }
+  }
 }

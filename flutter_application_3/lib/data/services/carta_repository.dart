@@ -44,5 +44,23 @@ class CartaRepository {
       throw Exception('Formato de datos inesperado: $response');
     }
   }
+  Future<bool> updateCarta(Carta carta) async {
+      try {
+        final response = await _client
+            .from('carta')
+            .update({
+              'type': carta.type,
+              'description': carta.description,
+              'state': carta.state,
+              'updated_at': DateTime.now().toIso8601String(), // Actualizar la fecha
+            })
+            .eq('carta_id', carta.cartaId)
+            .select()
+            .maybeSingle(); // Devuelve null si no hay filas
 
+        return response != null;
+      } catch (e) {
+        return false;
+      }
+    }
 }
