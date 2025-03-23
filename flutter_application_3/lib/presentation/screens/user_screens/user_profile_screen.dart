@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Asegúrate de importar provider
 import '../../../data/services/user_repository.dart';
 import '../../../data/models/user.dart';
+import '../../providers/auth_provider.dart'; // Asegúrate de importar el AuthProvider
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -76,9 +78,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
                 // Botón de Cerrar Sesion
                 ElevatedButton.icon(
-                  onPressed: () {
+                  onPressed: () async {
+                    // Llamamos al método logout
+                    await Provider.of<AuthProvider>(context, listen: false).logout();
 
-
+                    // Después de cerrar sesión, redirigimos a la pantalla de login
+                    Navigator.pushReplacementNamed(context, '/login'); // Asegúrate de tener '/login' configurado en tu MaterialApp
                   },
                   icon: const Icon(Icons.exit_to_app),
                   label: const Text("Cerrar Sesión"),
