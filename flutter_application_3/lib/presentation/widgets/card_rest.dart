@@ -1,16 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_example/data/models/restaurant.dart';
+import 'package:flutter_application_example/data/services/rate_repository.dart';
+import 'package:flutter_application_example/data/services/rating_calculate.dart';
 import '../../../core/constants/main_colors.dart';
+import 'package:flutter_application_example/data/models/rate.dart'; // Importa el modelo Rate
+
 import '../screens/user_screens/rest_detail_screen.dart';
 
-class RestaurantCard extends StatelessWidget {
+class RestaurantCard extends StatefulWidget {
   final Restaurant res;
 
   const RestaurantCard({super.key, required this.res});
 
   @override
+  _RestaurantCardState createState() => _RestaurantCardState();
+}
+
+class _RestaurantCardState extends State<RestaurantCard> {
+  late Future<List<Rate>> _ratesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Carga las calificaciones del restaurante cuando el widget se inicie
+    _ratesFuture = RateRepository().getRestaurantRates(widget.res.restaurantId);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Color statusColor = res.state == "Abierto" ? Colors.green : Colors.red;
+    final Color statusColor = widget.res.state == "Abierto" ? Colors.green : Colors.red;
 
     return Padding(
       padding: const EdgeInsets.all(7.0),
@@ -18,7 +36,7 @@ class RestaurantCard extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => RestDetailScreen(res: res),
+            builder: (context) => RestDetailScreen(res: widget.res),
           ),
         ),
         child: Container(
@@ -38,8 +56,25 @@ class RestaurantCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildImage(res.imageOfLocal ?? "https://e1.pngegg.com/pngimages/555/986/png-clipart-media-filetypes-jpg-icon-thumbnail.png"),
-              _buildInfoSection(res, statusColor),
+              _buildImage(widget.res.imageOfLocal ?? "https://e1.pngegg.com/pngimages/555/986/png-clipart-media-filetypes-jpg-icon-thumbnail.png"),
+              FutureBuilder<List<Rate>>(
+                future: _ratesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return const Text('Error al cargar las calificaciones');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return _buildInfoSection(widget.res, statusColor, 0.0); // Si no hay calificaciones, mostramos 0
+                  }
+
+                  // Calcular la calificación promedio
+                  List<Rate> rates = snapshot.data!;
+                  double averageRating = RatingUtils.calculateAverageRating(rates);
+
+                  return _buildInfoSection(widget.res, statusColor, averageRating);
+                },
+              ),
             ],
           ),
         ),
@@ -74,7 +109,7 @@ class RestaurantCard extends StatelessWidget {
   }
 
   /// 📌 Sección de información del restaurante
-  Widget _buildInfoSection(Restaurant res, Color statusColor) {
+  Widget _buildInfoSection(Restaurant res, Color statusColor, double averageRating) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -82,7 +117,7 @@ class RestaurantCard extends StatelessWidget {
         children: [
           Text(res.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 5),
-          _buildCategoryAndRating(res),
+          _buildCategoryAndRating(averageRating), // Muestra la calificación promedio
           const SizedBox(height: 5),
           _buildScheduleAndStatus(res, statusColor),
         ],
@@ -91,18 +126,18 @@ class RestaurantCard extends StatelessWidget {
   }
 
   /// 📌 Categoría y estrellas
-  Widget _buildCategoryAndRating(Restaurant res) {
+  Widget _buildCategoryAndRating(double averageRating) {
     return Row(
       children: [
         const Icon(Icons.restaurant, size: 18, color: Colors.grey),
         const SizedBox(width: 5),
-        Text(res.category ?? "sin categoria", style: const TextStyle(fontSize: 14, color: Colors.grey)),
+        Text(widget.res.category ?? "sin categoria", style: const TextStyle(fontSize: 14, color: Colors.grey)),
         const SizedBox(width: 10),
         Row(
           children: List.generate(
             5,
             (index) => Icon(
-              index < 4 ? Icons.star : Icons.star_border, // Simula 4 estrellas
+              index < averageRating.floor() ? Icons.star : Icons.star_border, // Usamos averageRating aquí
               size: 18,
               color: Colors.amber,
             ),
