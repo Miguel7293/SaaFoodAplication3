@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_example/data/models/rate.dart';
 import 'package:flutter_application_example/data/models/user.dart';
+import 'package:flutter_application_example/data/services/rate_repository.dart';
 import 'package:flutter_application_example/data/services/rating_service.dart';
 import 'package:flutter_application_example/data/services/user_repository.dart';
 import 'package:flutter_application_example/presentation/providers/auth_provider.dart';
 import 'package:flutter_application_example/presentation/widgets/rating_card.dart';
 import 'package:flutter_application_example/presentation/widgets/rating_dialog.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../data/services/rate_repository.dart';
 
 class RatingsTab extends StatefulWidget {
   final int restaurantId;
