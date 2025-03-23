@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/data/models/plate.dart';
 import 'package:flutter_application_example/data/models/rate.dart';
-import 'package:flutter_application_example/data/models/user.dart';
+import 'package:flutter_application_example/data/services/plate_repository.dart';
 import 'package:flutter_application_example/data/services/rate_repository.dart';
 import 'package:flutter_application_example/data/services/user_repository.dart';
-import 'package:flutter_application_example/presentation/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../data/models/user.dart';
+import '../../../providers/auth_provider.dart';
+
+
 class RatingsTab extends StatefulWidget {
   final int restaurantId;
 
@@ -47,35 +52,109 @@ class _RatingsTabState extends State<RatingsTab> {
     }
   }
 
-  Future<void> _addRating(int stars, String comment) async {
-    if (_userId == null) return;
-
-    final newRate = Rate(
-      points: stars,
-      description: comment,
-      userRestaurantId: _userId!,
-      restaurantId: widget.restaurantId,
-      createdAt: DateTime.now(),
-    );
-
+  Future<void> _deleteRating(int rateId) async {
     try {
-      await _rateRepo.addRate(newRate);
-      await _fetchRatings(); // Recargar los ratings
+      final success = await _rateRepo.deleteRate(rateId);
+      if (success) {
+        await _fetchRatings(); // Recargar las calificaciones
+      }
     } catch (e) {
-      debugPrint('❌ Error al agregar rating: $e');
+      debugPrint('❌ Error eliminando rating: $e');
     }
   }
 
+
   void _showRatingDialog() {
-    int selectedStars = 5;
-    TextEditingController commentController = TextEditingController();
+  int selectedStars = 5; // Valor predeterminado de estrellas seleccionadas
+  TextEditingController commentController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text("Calificar Restaurante"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                5,
+                (index) => IconButton(
+                  icon: Icon(
+                    index < selectedStars ? Icons.star : Icons.star_border,
+                    color: Colors.orange,
+                    size: 30,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      selectedStars = index + 1; // Actualizar estrellas seleccionadas
+                    });
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: commentController,
+              maxLines: 2,
+              decoration: InputDecoration(
+                labelText: "Escribe tu comentario",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Cerrar el diálogo
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _addRating(selectedStars, commentController.text); // Agregar la calificación
+              Navigator.pop(context); // Cerrar el diálogo
+            },
+            child: const Text("Enviar"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> _addRating(int stars, String comment) async {
+  if (_userId == null) return; // Si no hay usuario autenticado, no hacer nada
+
+  final newRate = Rate(
+    points: stars,
+    description: comment,
+    userRestaurantId: _userId!,
+    restaurantId: widget.restaurantId,
+    createdAt: DateTime.now(),
+  );
+
+  try {
+    await _rateRepo.addRate(newRate); // Agregar la calificación al repositorio
+    await _fetchRatings(); // Recargar la lista de calificaciones
+  } catch (e) {
+    debugPrint('❌ Error al agregar rating: $e');
+  }
+}
+
+
+
+  Future<void> _editRating(Rate rate) async {
+    int selectedStars = rate.points;
+    TextEditingController commentController = TextEditingController(text: rate.description);
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          title: const Text("Calificar Restaurante"),
+          title: const Text("Editar Calificación"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -101,7 +180,7 @@ class _RatingsTabState extends State<RatingsTab> {
                 controller: commentController,
                 maxLines: 2,
                 decoration: InputDecoration(
-                  labelText: "Escribe tu comentario",
+                  labelText: "Edita tu comentario",
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
               ),
@@ -113,11 +192,16 @@ class _RatingsTabState extends State<RatingsTab> {
               child: const Text("Cancelar"),
             ),
             ElevatedButton(
-              onPressed: () {
-                _addRating(selectedStars, commentController.text);
+              onPressed: () async {
+                final updatedRate = rate.copyWith(
+                  points: selectedStars,
+                  description: commentController.text,
+                );
+                await _rateRepo.updateRate(updatedRate);
+                await _fetchRatings(); // Recargar las calificaciones
                 Navigator.pop(context);
               },
-              child: const Text("Enviar"),
+              child: const Text("Guardar"),
             ),
           ],
         );
@@ -213,6 +297,21 @@ class _RatingsTabState extends State<RatingsTab> {
                                           style: const TextStyle(fontSize: 12, color: Colors.grey),
                                         ),
                                       ),
+                                      // Botones de editar y eliminar (solo si es del usuario actual)
+                                      if (_userId == rating.userRestaurantId)
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit, color: Colors.blue),
+                                              onPressed: () => _editRating(rating),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete, color: Colors.red),
+                                              onPressed: () => _deleteRating(rating.rateId!),
+                                            ),
+                                          ],
+                                        ),
                                     ],
                                   ),
                                 ),
