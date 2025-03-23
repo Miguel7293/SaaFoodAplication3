@@ -78,4 +78,18 @@ class UserRepository {
 
     return User.fromJson(response);
   }
+
+  Future<void> updateUserType(String userUid, String newType) async {
+    await _client.from('users')
+      .update({'type_user': newType})
+      .eq('user_uid', userUid);
+  }
+  
+  Future<void> submitOwnerApplication(String userUid, String businessInfo) async {
+    await _client.from('owner_applications').insert({
+      'user_uid': userUid,
+      'business_info': businessInfo,
+      'status': 'pending'
+    });
+  }
 }

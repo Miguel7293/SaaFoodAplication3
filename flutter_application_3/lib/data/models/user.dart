@@ -2,7 +2,7 @@ class User {
   final String profileImage;
   final String email;
   final String userUid;
-  final String typeUser;
+  final String typeUser; // Valores posibles: NotSpecified, customer, isWaiting, owner
   final String username;
   final DateTime createdAt;
 
