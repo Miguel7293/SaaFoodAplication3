@@ -131,64 +131,73 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
     );
   }
 
-  Widget _buildCartaSection(String title, List<Carta> cartas, Map<int, List<Plate>> platesByCarta) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+Widget _buildCartaSection(String title, List<Carta> cartas, Map<int, List<Plate>> platesByCarta) {
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Card(
+      elevation: 4, // Elevación para dar sombra
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12), // Bordes redondeados
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: cartas.length,
-            itemBuilder: (context, index) {
-              final carta = cartas[index];
-              final plates = platesByCarta[carta.cartaId] ?? [];
+            const SizedBox(height: 12),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: cartas.length,
+              itemBuilder: (context, index) {
+                final carta = cartas[index];
+                final plates = platesByCarta[carta.cartaId] ?? [];
 
-              return GestureDetector(
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditMenuOwnerScreen(carta: carta),
-                    ),
-                  );
+                return GestureDetector(
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditMenuOwnerScreen(carta: carta),
+                      ),
+                    );
 
-                  if (result == true) {
-                    _loadData();
-                  }
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        carta.type,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                    if (result == true) {
+                      _loadData();
+                    }
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          carta.type,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    _buildCategorySection("Platos", plates, carta, context),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+                      _buildCategorySection("Platos", plates, carta, context),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildCategorySection(String title, List<Plate> plates, Carta carta, BuildContext context) {
     final sortedPlates = List<Plate>.from(plates)
