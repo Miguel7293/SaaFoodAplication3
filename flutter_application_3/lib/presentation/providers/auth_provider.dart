@@ -27,7 +27,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> loginWithGoogle() async {
     try {
-      const webClientId = '546959425861-d4hlntkep2079qu2t5vjbdv8fklthndd.apps.googleusercontent.com';
+      const webClientId =
+          '546959425861-d4hlntkep2079qu2t5vjbdv8fklthndd.apps.googleusercontent.com';
       //const iosClientId = 'TU_CLIENT_ID_IOS'; // Opcional para iOS
 
       final GoogleSignIn googleSignIn = GoogleSignIn(
@@ -50,6 +51,12 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
+    try {
+      await GoogleSignIn().disconnect(); // Desconectar de Google
+    } catch (e) {
+      print('Error al cerrar sesión de Google: $e');
+    }
+
     await SupabaseConfig.client.auth.signOut();
   }
 }
