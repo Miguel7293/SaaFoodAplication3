@@ -43,6 +43,9 @@ class AppColors {
   //Paolo changes
 
   static const Color appBackground = Color(0xFF17E86B); // Color de fondo
+  static const Color primaryColor = Color(0xFF17E86B); // Color de fondo
+    static const Color secondaryColor = Color.fromARGB(255, 26, 11, 192); // Color de fondo
+
   static const Color googleButtonBackground = Colors.white;
   static const Color googleButtonText = Color.fromARGB(255, 0, 0, 0);
   static const Color googleButtonBorder = Color(0xFFDADCE0);

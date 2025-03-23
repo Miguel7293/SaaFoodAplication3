@@ -33,72 +33,114 @@ class ChoosingRoleScreen extends StatelessWidget {
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    backgroundColor: AppColors.appBackground,  // Color de fondo
+    backgroundColor: AppColors.appBackground,
     body: SafeArea(
-      child: Center(  // Centra todo el contenido
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,  // Centra verticalmente
-          children: [
-            // Logo centrado
-            SvgPicture.asset(
-              'lib/assets/images/logo_app.svg',  // Ruta del logo
-              height: 210,  // Tamaño del logo
-              semanticsLabel: 'App Logo',
-            ),
-            const SizedBox(height: 40),  // Espaciado entre el logo y los botones
-            // Botones centrados
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                children: [
-                  // Botón "Soy Cliente"
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,  // Texto en negro
-                      backgroundColor: AppColors.googleButtonBackground,
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),  // Borde redondeado
-                        side: BorderSide(color: AppColors.googleButtonBorder),
-                      ),
-                    ),
-                    onPressed: () => _updateUserType(context, 'customer'),
-                    child: const Text(
-                      'Soy Cliente',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),  // Espaciado entre botones
-                  // Botón "Soy Dueño de Negocio"
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,  // Texto en negro
-                      backgroundColor: AppColors.googleButtonBackground,
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),  // Borde redondeado
-                        side: BorderSide(color: AppColors.googleButtonBorder),
-                      ),
-                    ),
-                    onPressed: () => _updateUserType(context, 'NotSpecified'),
-                    child: const Text(
-                      'Soy Dueño de Negocio',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Logo con efecto de elevación
+          Expanded(
+            child: Center( // Centra el logo vertical y horizontalmente
+              child: SvgPicture.asset(
+                'assets/images/logo_app.svg',
+                height: 210,  // Tamaño aumentado
+                semanticsLabel: 'App Logo',
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 40),
+
+          // Contenedor de botones
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                // Botón Cliente
+                _buildRoleButton(
+                  context: context,
+                  icon: Icons.person_outline_rounded,
+                  title: 'Soy Cliente',
+                  subtitle: 'Buscar y disfrutar experiencias gastronómicas',
+                  onPressed: () => _updateUserType(context, 'customer'),
+                ),
+                const SizedBox(height: 20),
+                
+                // Botón Dueño
+                _buildRoleButton(
+                  context: context,
+                  icon: Icons.storefront_outlined,
+                  title: 'Soy Dueño de Negocio',
+                  subtitle: 'Gestionar y promocionar mi establecimiento',
+                  onPressed: () => _updateUserType(context, 'NotSpecified'),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     ),
   );
 }
+
+Widget _buildRoleButton({
+  required BuildContext context,
+  required IconData icon,
+  required String title,
+  required String subtitle,
+  required VoidCallback onPressed,
+}) {
+  return ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: AppColors.googleButtonBackground,
+      foregroundColor: AppColors.primaryTextColor,
+      padding: const EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(
+          color: AppColors.googleButtonBorder.withOpacity(0.3),
+          width: 1.5,
+        ),
+      ),
+      elevation: 0,
+      shadowColor: Colors.transparent,
+    ),
+    onPressed: onPressed,
+    child: Row(
+      children: [
+        Icon(icon, size: 28, color: AppColors.primaryColor),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Icon(
+          Icons.arrow_forward_ios_rounded,
+          size: 16,
+          color: Colors.grey,
+        ),
+      ],
+    ),
+  );
 }
+}
+

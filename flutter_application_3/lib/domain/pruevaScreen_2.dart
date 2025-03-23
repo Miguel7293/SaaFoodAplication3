@@ -33,8 +33,54 @@ class _PruevaScreenState extends State<PruevaScreen> {
     super.initState();
     //_initializeRepositories();
     //cargarDatos();
+    _procesarEmailRequest();
   }
 
+  Future<void> _procesarEmailRequest() async {
+    // Clave API de SendGrid (¡no la exponga en producción!)
+    final String apiKey =
+        'NOT HERE';
+
+    // URL de la API de SendGrid
+    final String url = 'https://api.sendgrid.com/v3/mail/send';
+
+    // Construcción del mensaje
+    final Map<String, dynamic> message = {
+      "personalizations": [
+        {
+          "to": [
+            {"email": "wtherosluw02@gmail.com"}
+          ],
+          "subject": "Hello from SendGrid"
+        }
+      ],
+      "from": {"email": "solopaololuna@gmail.com"},
+      "content": [
+        {"type": "text/plain", "value": "Hello from SendGrid"},
+        {"type": "text/html", "value": "<h1>Hello from SendGrid</h1>"}
+      ]
+    };
+
+    try {
+      // Realizar la solicitud POST a SendGrid
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          "Authorization": "Bearer $apiKey",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(message),
+      );
+
+      if (response.statusCode == 202) {
+        print(">>>>>>>>>>>>>> Email sent...");
+      } else {
+        print(">>>>>>>>>>>>>> Error sending email: ${response.body}");
+      }
+    } catch (e) {
+      print(">>>>>>>>>>>>>> Excepción al enviar email: $e");
+    }
+  }
 
   void _initializeRepositories() {
     _plateRepo = Provider.of<PlateRepository>(context, listen: false);

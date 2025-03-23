@@ -25,6 +25,7 @@ dependencies:
   url_launcher: ^6.3.1
   flutter_polyline_points: ^2.1.0
   flutter_svg: ^2.0.7
+  image_picker: ^1.0.4
 
   
 dev_dependencies:
@@ -36,5 +37,5 @@ flutter:
   uses-material-design: true
   assets:
     - .env
-    - lib/assets/images/logo_app.svg
-    - lib/assets/images/google_icon.svg
+    - assets/images/logo_app.svg
+    - assets/images/google_icon.svg

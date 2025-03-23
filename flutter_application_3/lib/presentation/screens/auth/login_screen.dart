@@ -16,15 +16,24 @@ class LoginScreen extends StatelessWidget {
     final scaffold = ScaffoldMessenger.of(context);
 
     try {
-      // 1. Autenticación con Google
-      await auth.loginWithGoogle();
-      
-      // 2. Obtener UID del usuario autenticado
-      final uid = auth.userId;
-      if (uid == null) throw Exception('Error obteniendo ID de usuario');
+    // 1. Autenticación con Google
+    await auth.loginWithGoogle();
+    
+    // 2. Espera progresiva con timeout
+    const maxRetries = 5;
+    const retryDelay = Duration(milliseconds: 500);
+    String? uid;
+    
+    for (int i = 0; i < maxRetries; i++) {
+      uid = auth.userId;
+      if (uid != null) break;
+      await Future.delayed(retryDelay);
+    }
 
-      // 3. Verificar/crear usuario en la tabla users
-      app_model.User user;       
+    if (uid == null) throw Exception('No se pudo obtener el ID de usuario después de ${maxRetries * retryDelay.inMilliseconds}ms');
+
+    // 3. Verificar/crear usuario
+    app_model.User user;
       
       try {
         user = await userRepo.getUserById(uid);
@@ -79,7 +88,7 @@ Widget build(BuildContext context) {
           Expanded(
             child: Center( // Centra el logo vertical y horizontalmente
               child: SvgPicture.asset(
-                'lib/assets/images/logo_app.svg',  // Ruta CORRECTA (sin 'lib/')
+                'assets/images/logo_app.svg',  // Ruta CORRECTA (sin 'lib/')
                 height: 210,  // Tamaño aumentado
                 semanticsLabel: 'App Logo',
               ),
@@ -103,7 +112,7 @@ Widget build(BuildContext context) {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SvgPicture.asset(
-                    'lib/assets/images/google_icon.svg',  // Ruta CORRECTA
+                    'assets/images/google_icon.svg',  // Ruta CORRECTA
                     height: 24,  // Tamaño de icono reducido
                   ),
                   const SizedBox(width: 12),  // Espaciado reducido
