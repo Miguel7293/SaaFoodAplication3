@@ -13,7 +13,7 @@ class MapController {
   Set<Polyline> polylines = {};
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination;
-  List<LatLng>? _lastRoute; // Última ruta guardada
+  List<LatLng>? _lastRoute;
   final RestaurantRepository _restaurantRepo = RestaurantRepository();
   final MapService _mapService = MapService();
   final LatLng _initialPosition = const LatLng(-15.8402, -70.0219);
@@ -38,7 +38,7 @@ class MapController {
   void initialize() async {
     await _getUserLocation();
     await _loadRestaurants();
-    _trackUserLocation(); // 🔹 Comienza el seguimiento en tiempo real
+    _trackUserLocation();
   }
 
   void dispose() {
@@ -48,20 +48,39 @@ class MapController {
   }
 
   Future<void> _getUserLocation() async {
-    if (!await Geolocator.isLocationServiceEnabled()) return;
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        showMessage("La ubicación está desactivada. Actívala para usar esta función.");
+        return;
+      }
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) return;
-    }
+      LocationPermission permission = await Geolocator.checkPermission();
 
-    final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          showMessage("Permiso de ubicación denegado.");
+          return;
+        }
+      }
 
-    if (!_isDisposed) {
-      _currentPosition = position;
-      updateUI();
+      if (permission == LocationPermission.deniedForever) {
+        showMessage("Los permisos de ubicación están bloqueados. Actívalos en configuración.");
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      if (!_isDisposed) {
+        _currentPosition = position;
+        updateUI();
+      }
+    } catch (e) {
+      showMessage("Error al obtener ubicación: ${e.toString()}");
+      _currentPosition = null; // Asegurar que sea null en caso de error
     }
   }
 
@@ -69,7 +88,7 @@ class MapController {
     try {
       final restaurants = await _restaurantRepo.getAllRestaurants();
       if (!_isDisposed) {
-        markers.addAll(restaurants
+        markers = restaurants
             .where((r) => r.coordinates != null)
             .map((r) => _createMarker(
                   r.restaurantId.toString(),
@@ -77,11 +96,13 @@ class MapController {
                   r.name,
                   BitmapDescriptor.hueRed,
                   r,
-                )));
+                ))
+            .toSet();
         updateUI();
       }
     } catch (e) {
-      print("❌ Error al cargar restaurantes: $e");
+      showMessage("Error al cargar restaurantes");
+      markers = {}; // Limpiar marcadores en caso de error
     }
   }
 
@@ -92,29 +113,44 @@ class MapController {
       position: position,
       icon: BitmapDescriptor.defaultMarkerWithHue(hue),
       infoWindow: InfoWindow(title: title),
-      onTap: restaurant != null ? () => _selectRestaurant(restaurant) : null,
+      onTap: restaurant != null 
+          ? () => _selectRestaurant(restaurant) 
+          : null,
     );
   }
 
   void _selectRestaurant(Restaurant restaurant) {
-    if (_currentPosition == null || _isDisposed) return;
+    if (_isDisposed) return;
+    
+    
+    if (restaurant.coordinates == null) {
+      showMessage("Este restaurante no tiene ubicación registrada.");
+      return;
+    }
+    
     showRestaurantDetails(restaurant);
   }
 
   Position? getCurrentPosition() => _currentPosition;
 
   Future<void> drawRoute(LatLng destination) async {
-    if (_currentPosition == null || _isDisposed) return;
+    if (_isDisposed) return;
+    
+    if (_currentPosition == null) {
+      showMessage("No se puede calcular la ruta. Activa la ubicación.");
+      return;
+    }
 
     _destination = destination;
 
     try {
       final route = await _mapService.getRoute(
-          LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-          destination);
+        LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+        destination,
+      );
 
       if (!_isDisposed) {
-        _lastRoute = route; // 🔹 Guarda la última ruta calculada
+        _lastRoute = route;
         polylines = {
           Polyline(
             polylineId: const PolylineId("route"),
@@ -126,15 +162,20 @@ class MapController {
         updateUI();
       }
     } catch (e) {
-      print("❌ Error al obtener ruta: $e");
+      showMessage("Error al calcular la ruta: ${e.toString()}");
+      polylines.clear();
+      _destination = null;
+      _lastRoute = null;
     }
   }
 
   void _trackUserLocation() {
+    _positionStream?.cancel(); // Cancelar cualquier suscripción previa
+    
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 5, // 🔹 Actualiza si se mueve más de 5 metros
+        distanceFilter: 5,
       ),
     ).listen((Position position) {
       if (_isDisposed) return;
@@ -142,41 +183,46 @@ class MapController {
       _currentPosition = position;
       updateUI();
 
-      if (_destination != null) {
+      if (_destination == null) return;
+
+      try {
         double distanceToDestination = Geolocator.distanceBetween(
-          _currentPosition!.latitude,
-          _currentPosition!.longitude,
+          position.latitude,
+          position.longitude,
           _destination!.latitude,
           _destination!.longitude,
         );
 
-        // 🔹 Si está a menos de 10 metros, elimina la ruta
         if (distanceToDestination < 10) {
           showMessage("¡Has llegado a tu destino! 🎉");
-          polylines.clear(); // 🔹 Borra la ruta
-          _destination = null; // 🔹 Resetea el destino
-          _lastRoute = null; // 🔹 Limpia la última ruta
+          polylines.clear();
+          _destination = null;
+          _lastRoute = null;
           updateUI();
           return;
         }
 
-        // 🔹 Verifica si se desvió más de 50 metros
         if (_lastRoute != null) {
           double minDistanceToRoute = _lastRoute!
               .map((point) => Geolocator.distanceBetween(
-                    _currentPosition!.latitude,
-                    _currentPosition!.longitude,
+                    position.latitude,
+                    position.longitude,
                     point.latitude,
                     point.longitude,
                   ))
               .reduce((a, b) => a < b ? a : b);
 
           if (minDistanceToRoute > 50) {
-            print("🔄 Usuario desviado +50m, recalculando ruta...");
+            showMessage("Te has desviado, recalculando ruta...");
             drawRoute(_destination!);
           }
         }
+      } catch (e) {
+        print("Error en seguimiento de ubicación: $e");
       }
+    }, onError: (e) {
+      showMessage("Error en seguimiento de ubicación");
+      _currentPosition = null;
     });
   }
 }

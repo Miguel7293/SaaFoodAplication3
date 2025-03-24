@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/core/constants/main_colors.dart';
 import 'package:flutter_application_example/data/models/plate.dart';
 import 'package:flutter_application_example/presentation/theme/styles.dart';
 
@@ -41,7 +42,7 @@ class PlateDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: () {},
-                style: AppStyles.primaryButtonStyle,
+                style: AppStyles.buttonStyle(AppColors.descriptionPrimary),
                 child: Text("Ir a Restaurante"),
               ),
             ),

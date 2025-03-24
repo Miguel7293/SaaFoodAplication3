@@ -3,6 +3,7 @@ import 'package:flutter_application_example/data/services/plate_repository.dart'
 import 'package:flutter_application_example/data/models/plate.dart';
 import 'package:flutter_application_example/data/models/restaurant.dart';
 import 'package:flutter_application_example/presentation/screens/user_screens/search_screen.dart';
+import 'package:flutter_application_example/presentation/widgets/search_app_bar.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/rest_list_view.dart';
 import '../../../data/services/restaurant_repository.dart';
@@ -42,24 +43,19 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Explorar"),
-        backgroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SearchScreen(
-                      allPlates: allPlates, allRestaurants: allRestaurants),
-                ),
-              );
-            },
-          ),
-        ],
+      appBar: CustomAppBar(
+        title: "SA Foods",
+        onSearchPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => SearchScreen(
+                    allPlates: allPlates, allRestaurants: allRestaurants)),
+          );
+        },
       ),
+
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
