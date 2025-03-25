@@ -28,25 +28,23 @@ class _MapUserScreenState extends State<MapUserScreen> {
   void _showRestaurantDetails(Restaurant restaurant) {
     if (!mounted) return;
 
+    final userPosition = _mapController.getCurrentPosition();
+
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor:
-          Colors.transparent, // Fondo transparente para evitar bloqueos
+      backgroundColor: Colors.transparent,
       isDismissible: true,
       enableDrag: true,
       builder: (context) {
         return Stack(
           children: [
-            // Detector para cerrar el modal al tocar fuera
             GestureDetector(
               onTap: () => Navigator.pop(context),
               behavior: HitTestBehavior.opaque,
-              child: Container(
-                  color: Colors.transparent), // Fondo sin interferencias
+              child: Container(color: Colors.transparent),
             ),
-
-            // Hoja deslizable
             DraggableScrollableSheet(
               initialChildSize: 0.5,
               minChildSize: 0.3,
@@ -56,10 +54,10 @@ class _MapUserScreenState extends State<MapUserScreen> {
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(16)),
                   child: Container(
-                    color: Colors.transparent, // Color sólido para el fondo del modal
+                    color: Colors.transparent,
                     child: RestaurantDetails(
                       restaurant,
-                      _mapController.getCurrentPosition()!,
+                      userPosition, // ✅ Ahora estamos seguros de que no es null
                       _mapController.drawRoute,
                     ),
                   ),

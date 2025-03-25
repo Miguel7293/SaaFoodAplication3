@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/core/constants/main_colors.dart';
+import 'package:flutter_application_example/presentation/theme/styles.dart';
 import 'package:provider/provider.dart'; // Asegúrate de importar provider
 import '../../../data/services/user_repository.dart';
 import '../../../data/models/user.dart';
@@ -23,7 +25,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Perfil del Usuario")),
+      appBar: AppStyles.appBar("Perfil del Usuario"),
       body: FutureBuilder<User>(
         future: _userFuture,
         builder: (context, snapshot) {
@@ -87,11 +89,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   },
                   icon: const Icon(Icons.exit_to_app),
                   label: const Text("Cerrar Sesión"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  ),
+                  style: AppStyles.buttonStyle(AppColors.red),
                 ),
               ],
             ),

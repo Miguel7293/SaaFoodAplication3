@@ -29,6 +29,7 @@ class AppColors {
   static const Color green = Color(0xFF008F4C);
   static const Color greenLight = Color(0xFF00C853);
   static const Color starYellow = Color(0xFFFFC107);
+  static const Color red = Color(0xFFFF5252);
 
   // Descripciones
   static const Color descriptionPrimary = Color(0xFF008F4C);
