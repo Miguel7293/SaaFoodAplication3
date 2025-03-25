@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_example/data/services/map_controller.dart';
 import 'package:flutter_application_example/data/models/restaurant.dart';
+import 'package:flutter_application_example/presentation/theme/styles.dart';
 import 'package:flutter_application_example/presentation/widgets/rest_bottom_details.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -57,7 +58,7 @@ class _MapUserScreenState extends State<MapUserScreen> {
                     color: Colors.transparent,
                     child: RestaurantDetails(
                       restaurant,
-                      userPosition, // ✅ Ahora estamos seguros de que no es null
+                      userPosition,
                       _mapController.drawRoute,
                     ),
                   ),
@@ -89,7 +90,7 @@ class _MapUserScreenState extends State<MapUserScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Mapa de Restaurantes")),
+      appBar: AppStyles.appBar("Mapa de restaurantes"),
       body: GoogleMap(
         initialCameraPosition: _mapController.initialCameraPosition,
         markers: _mapController.markers,

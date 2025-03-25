@@ -56,7 +56,7 @@ class CardPlates extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(0),
                 child: Text(
-                  "\$${plate.price?.toStringAsFixed(2) ?? '0.00'}",
+                  "S/.${plate.price?.toStringAsFixed(2) ?? '0.00'}",
                   style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

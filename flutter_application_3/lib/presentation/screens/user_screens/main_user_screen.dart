@@ -18,6 +18,8 @@ class UserHomeScreen extends StatefulWidget {
 
 class _UserHomeScreenState extends State<UserHomeScreen> {
   List<Restaurant> allRestaurants = [];
+  List<Restaurant> topRatedRestaurants = [];
+  List<Plate> bestPricedPlates = [];
   List<Plate> allPlates = [];
 
   @override
@@ -30,12 +32,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     final restaurants =
         await Provider.of<RestaurantRepository>(context, listen: false)
             .getAllRestaurants();
+
+    final bestRestaurants = await Provider.of<RestaurantRepository>(context, listen: false).getTopRatedRestaurants();
+
     final plates = await PlateRepository().getAllPlates();
+    final pricedPlates =  await PlateRepository().getBestPricedPlates();
+
+
 
     if (mounted) {
       setState(() {
+        topRatedRestaurants = bestRestaurants;
         allRestaurants = restaurants;
         allPlates = plates;
+        bestPricedPlates = pricedPlates;
       });
     }
   }
@@ -60,11 +70,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SectionTitle(title: "RESTAURANTES CERCANOS"),
-            RestaurantsListView(restaurants: allRestaurants),
-            const SectionTitle(title: "HOT DEALS"),
-            PlatesListView(plates: allPlates),
-            const SectionTitle(title: "RECOMMENDATIONS"),
+            const SectionTitle(title: "RESTAURANTES RECOMENDADOS"),
+            RestaurantsListView(restaurants: topRatedRestaurants),
+            const SectionTitle(title: "MEJORES PRECIOS"),
+            PlatesListView(plates: bestPricedPlates),
+            const SectionTitle(title: "PLATOS CERCA DE TI"),
             PlatesListView(plates: allPlates),
             const SizedBox(height: 180),
           ],

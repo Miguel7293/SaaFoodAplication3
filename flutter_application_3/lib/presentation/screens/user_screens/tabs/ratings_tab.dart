@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/core/constants/main_colors.dart';
+import 'package:flutter_application_example/presentation/theme/styles.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_application_example/data/models/rate.dart';
 import 'package:flutter_application_example/data/models/user.dart';
 import 'package:flutter_application_example/data/services/rate_repository.dart';
@@ -7,7 +10,6 @@ import 'package:flutter_application_example/data/services/user_repository.dart';
 import 'package:flutter_application_example/presentation/providers/auth_provider.dart';
 import 'package:flutter_application_example/presentation/widgets/rating_card.dart';
 import 'package:flutter_application_example/presentation/widgets/rating_dialog.dart';
-import 'package:provider/provider.dart';
 
 class RatingsTab extends StatefulWidget {
   final int restaurantId;
@@ -24,6 +26,7 @@ class _RatingsTabState extends State<RatingsTab> {
   late String? _userId;
   List<Rate> _ratings = [];
   double _averageRating = 0.0;
+  Map<int, int> _ratingDistribution = {};
 
   @override
   void initState() {
@@ -44,6 +47,7 @@ class _RatingsTabState extends State<RatingsTab> {
       setState(() {
         _ratings = ratings;
         _averageRating = ratings.isNotEmpty ? ratings.map((e) => e.points).reduce((a, b) => a + b) / ratings.length : 0.0;
+        _ratingDistribution = { for (int i = 1; i <= 5; i++) i: ratings.where((r) => r.points == i).length };
       });
     } catch (e) {
       debugPrint('❌ Error obteniendo ratings: $e');
@@ -60,7 +64,6 @@ class _RatingsTabState extends State<RatingsTab> {
           onSave: (stars, comment) async {
             if (_userId == null) return;
             if (rate == null) {
-              // Crear nueva calificación
               final newRate = Rate(
                 points: stars,
                 description: comment,
@@ -70,7 +73,6 @@ class _RatingsTabState extends State<RatingsTab> {
               );
               await _ratingService.addRating(newRate);
             } else {
-              // Editar calificación existente
               final updatedRate = rate.copyWith(
                 points: stars,
                 description: comment,
@@ -84,6 +86,46 @@ class _RatingsTabState extends State<RatingsTab> {
     );
   }
 
+  Widget _buildStarRow() {
+    List<Widget> stars = [];
+    for (int i = 1; i <= 5; i++) {
+      if (_averageRating >= i) {
+        stars.add(const Icon(Icons.star, color: AppColors.smallItemsColor, size: 37));
+      } else if (_averageRating > i - 1 && _averageRating < i) {
+        stars.add(const Icon(Icons.star_half, color: AppColors.smallItemsColor, size: 37));
+      } else {
+        stars.add(const Icon(Icons.star_border, color: AppColors.smallItemsColor, size: 37));
+      }
+    }
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: stars);
+  }
+
+  Widget _buildRatingDistribution() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 21, right: 21),
+      child: Column(
+        children: _ratingDistribution.entries.map((entry) {
+          return Row(
+            children: [
+              Text("${entry.key} ", style: const TextStyle(fontSize: 16)),
+              const Icon(Icons.star, color: AppColors.smallItemsColor, size: 22),
+              const SizedBox(width: 5),
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: entry.value / (_ratings.isNotEmpty ? _ratings.length : 1),
+                  backgroundColor: Colors.grey[300],
+                  color: AppColors.smallItemsColor,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text("${entry.value}", style: const TextStyle(fontSize: 14)),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -91,20 +133,13 @@ class _RatingsTabState extends State<RatingsTab> {
         const SizedBox(height: 10),
         const Text("Calificaciones", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            5,
-            (index) => Icon(
-              index < _averageRating ? Icons.star : Icons.star_border,
-              color: Colors.orange,
-              size: 30,
-            ),
-          ),
-        ),
+        _buildStarRow(),
         Text("${_averageRating.toStringAsFixed(1)} / 5", style: const TextStyle(fontSize: 16)),
+        const SizedBox(height: 10),
+        _buildRatingDistribution(),
         const SizedBox(height: 20),
         ElevatedButton.icon(
+          style: AppStyles.buttonStyle(AppColors.descriptionPrimary),
           onPressed: () => _showRatingDialog(),
           icon: const Icon(Icons.rate_review),
           label: const Text("Dejar una calificación"),
@@ -133,7 +168,7 @@ class _RatingsTabState extends State<RatingsTab> {
                           user: user,
                           currentUserId: _userId,
                           onEdit: (rate) async {
-                            _showRatingDialog(rate: rate); // Llamada al diálogo para editar
+                            _showRatingDialog(rate: rate);
                           },
                           onDelete: (rateId) async {
                             await _ratingService.deleteRating(rateId);

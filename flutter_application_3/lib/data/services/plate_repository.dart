@@ -17,28 +17,40 @@ class PlateRepository {
           .from('plates')
           .select()
           .eq('plate_id', plateId)
-          .single(); 
+          .single();
       return Plate.fromJson(response);
     } catch (e) {
       debugPrint('❌ Error obteniendo el plato por ID: $e');
       throw Exception('No se pudo obtener el plato con ID: $plateId');
     }
   }
+
   Future<List<Plate>> getPlatesByCartaId(int cartaId) async {
-    final response = await _client
-        .from('plates')
-        .select()
-        .eq('cart_id', cartaId);
+    final response =
+        await _client.from('plates').select().eq('cart_id', cartaId);
 
     return (response as List).map((e) => Plate.fromJson(e)).toList();
   }
 
+  Future<List<Plate>> getBestPricedPlates({int limit = 15}) async {
+    try {
+      final response = await _client
+          .from('plates')
+          .select()
+          .order('price', ascending: true) // Ordena por precio ascendente
+          .limit(limit); // Limita la cantidad de platos obtenidos
+
+      return (response as List).map((e) => Plate.fromJson(e)).toList();
+    } catch (e) {
+      debugPrint('❌ Error obteniendo los platos con mejor precio: $e');
+      return [];
+    }
+  }
+
   Future<Plate> addPlate(Plate plate) async {
     final data = plate.toJson();
-    final response = await _client.from('plates')
-      .insert(data)
-      .select()
-      .single();
+    final response =
+        await _client.from('plates').insert(data).select().single();
 
     return Plate.fromJson(response);
   }
@@ -57,18 +69,19 @@ class PlateRepository {
           .timeout(const Duration(seconds: 5));
 
       return Plate.fromJson(response);
-  } on PostgrestException catch (e) {
-    if (e.code == 'PGRST116') { // Código de error cuando no se encuentra el registro
-      throw Exception('Rating no encontrado con ID: ${plate.plateId}');
+    } on PostgrestException catch (e) {
+      if (e.code == 'PGRST116') {
+        // Código de error cuando no se encuentra el registro
+        throw Exception('Rating no encontrado con ID: ${plate.plateId}');
+      }
+      rethrow;
     }
-    rethrow;
   }
-  }
-
 
   Future<bool> deletePlate(int plateId) async {
     try {
-      final response = await _client.from('plates')
+      final response = await _client
+          .from('plates')
           .delete()
           .eq('plate_id', plateId)
           .select()

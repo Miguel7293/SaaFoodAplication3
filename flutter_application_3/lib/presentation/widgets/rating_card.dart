@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/core/constants/main_colors.dart';
 import 'package:flutter_application_example/data/models/rate.dart';
 import 'package:flutter_application_example/data/models/user.dart';
 
@@ -50,7 +51,7 @@ class RatingCard extends StatelessWidget {
                   Row(
                     children: List.generate(5, (i) => Icon(
                       Icons.star,
-                      color: i < rating.points ? Colors.orange : Colors.grey,
+                      color: i < rating.points ? AppColors.smallItemsColor : Colors.grey,
                       size: 20,
                     )),
                   ),
@@ -70,7 +71,7 @@ class RatingCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          icon: const Icon(Icons.edit, color: AppColors.smallItemsColor),
                           onPressed: () => onEdit(rating),
                         ),
                         IconButton(

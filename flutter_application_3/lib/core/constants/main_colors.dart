@@ -26,7 +26,7 @@ class AppColors {
   static const Color grayDark = Color(0xFFB0B0B0);
 
   // Colores primarios y secundarios
-  static const Color green = Color(0xFF008F4C);
+  static const Color smallItemsColor = Color(0xFF00C853);
   static const Color greenLight = Color(0xFF00C853);
   static const Color starYellow = Color(0xFFFFC107);
   static const Color red = Color(0xFFFF5252);

@@ -28,7 +28,8 @@ class _RestaurantCardState extends State<RestaurantCard> {
 
   @override
   Widget build(BuildContext context) {
-    final Color statusColor = widget.res.state == "Abierto" ? Colors.green : Colors.red;
+    final Color statusColor =
+        widget.res.state == "Abierto" ? Colors.green : Colors.red;
 
     return Padding(
       padding: const EdgeInsets.all(7.0),
@@ -56,7 +57,8 @@ class _RestaurantCardState extends State<RestaurantCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildImage(widget.res.imageOfLocal ?? "https://e1.pngegg.com/pngimages/555/986/png-clipart-media-filetypes-jpg-icon-thumbnail.png"),
+              _buildImage(widget.res.imageOfLocal ??
+                  "https://e1.pngegg.com/pngimages/555/986/png-clipart-media-filetypes-jpg-icon-thumbnail.png"),
               FutureBuilder<List<Rate>>(
                 future: _ratesFuture,
                 builder: (context, snapshot) {
@@ -65,14 +67,17 @@ class _RestaurantCardState extends State<RestaurantCard> {
                   } else if (snapshot.hasError) {
                     return const Text('Error al cargar las calificaciones');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return _buildInfoSection(widget.res, statusColor, 0.0); // Si no hay calificaciones, mostramos 0
+                    return _buildInfoSection(widget.res, statusColor,
+                        0.0); // Si no hay calificaciones, mostramos 0
                   }
 
                   // Calcular la calificación promedio
                   List<Rate> rates = snapshot.data!;
-                  double averageRating = RatingUtils.calculateAverageRating(rates);
+                  double averageRating =
+                      RatingUtils.calculateAverageRating(rates);
 
-                  return _buildInfoSection(widget.res, statusColor, averageRating);
+                  return _buildInfoSection(
+                      widget.res, statusColor, averageRating);
                 },
               ),
             ],
@@ -102,22 +107,27 @@ class _RestaurantCardState extends State<RestaurantCard> {
         errorBuilder: (context, error, stackTrace) => Container(
           height: 90,
           color: Colors.grey[300],
-          child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+          child:
+              const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
         ),
       ),
     );
   }
 
   /// 📌 Sección de información del restaurante
-  Widget _buildInfoSection(Restaurant res, Color statusColor, double averageRating) {
+  Widget _buildInfoSection(
+      Restaurant res, Color statusColor, double averageRating) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(res.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(res.name,
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 5),
-          _buildCategoryAndRating(averageRating), // Muestra la calificación promedio
+          _buildCategoryAndRating(
+              averageRating), // Muestra la calificación promedio
           const SizedBox(height: 5),
           _buildScheduleAndStatus(res, statusColor),
         ],
@@ -125,23 +135,34 @@ class _RestaurantCardState extends State<RestaurantCard> {
     );
   }
 
-  /// 📌 Categoría y estrellas
+  /// 📌 Categoría y estrellas con soporte para decimales
   Widget _buildCategoryAndRating(double averageRating) {
+    int fullStars = averageRating.floor(); // Número de estrellas completas
+    bool hasHalfStar =
+        (averageRating - fullStars) >= 0.5; // Si hay media estrella
+    int emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Estrellas vacías
+
     return Row(
       children: [
         const Icon(Icons.restaurant, size: 18, color: Colors.grey),
         const SizedBox(width: 5),
-        Text(widget.res.category ?? "sin categoria", style: const TextStyle(fontSize: 14, color: Colors.grey)),
+        Text(widget.res.category ?? "sin categoría",
+            style: const TextStyle(fontSize: 14, color: Colors.grey)),
         const SizedBox(width: 10),
         Row(
-          children: List.generate(
-            5,
-            (index) => Icon(
-              index < averageRating.floor() ? Icons.star : Icons.star_border, // Usamos averageRating aquí
-              size: 18,
-              color: Colors.amber,
-            ),
-          ),
+          children: [
+            ...List.generate(
+                fullStars,
+                (index) => const Icon(Icons.star,
+                    size: 18, color: Colors.amber)), // 🌟 Estrellas llenas
+            if (hasHalfStar)
+              const Icon(Icons.star_half,
+                  size: 18, color: Colors.amber), // ⭐️ Media estrella
+            ...List.generate(
+                emptyStars,
+                (index) => const Icon(Icons.star_border,
+                    size: 18, color: Colors.amber)), // ☆ Estrellas vacías
+          ],
         ),
       ],
     );
@@ -153,11 +174,13 @@ class _RestaurantCardState extends State<RestaurantCard> {
       children: [
         const Icon(Icons.schedule, size: 18, color: Colors.grey),
         const SizedBox(width: 5),
-        Text(res.horario, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+        Text(res.horario,
+            style: const TextStyle(fontSize: 14, color: Colors.grey)),
         const SizedBox(width: 10),
         Text(
           res.state ?? "default",
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: statusColor),
+          style: TextStyle(
+              fontSize: 14, fontWeight: FontWeight.bold, color: statusColor),
         ),
       ],
     );
