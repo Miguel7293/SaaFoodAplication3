@@ -121,4 +121,42 @@ class RestaurantRepository {
       return [];
     }
   }
+
+  Future<Restaurant?> getRestaurantByPlateId(int plateId) async {
+    try {
+      // Obtener el cart_id asociado al plate_id
+      final plateResponse = await _client
+          .from('plates')
+          .select('cart_id')
+          .eq('plate_id', plateId)
+          .single();
+
+      if (plateResponse == null || plateResponse is! Map<String, dynamic>) {
+        return null;
+      }
+
+      final int? cartId = plateResponse['cart_id'];
+      if (cartId == null) return null;
+
+      // Obtener el restaurant_id asociado al cart_id
+      final cartaResponse = await _client
+          .from('carta')
+          .select('rest_cart')
+          .eq('carta_id', cartId)
+          .single();
+
+      if (cartaResponse == null || cartaResponse is! Map<String, dynamic>) {
+        return null;
+      }
+
+      final int? restaurantId = cartaResponse['rest_cart'];
+      if (restaurantId == null) return null;
+
+      // Obtener los datos del restaurante
+      return getRestaurantById(restaurantId);
+    } catch (e) {
+      debugPrint("❌ Error en getRestaurantByPlateId: $e");
+      return null;
+    }
+  }
 }

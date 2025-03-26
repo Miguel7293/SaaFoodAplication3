@@ -1,25 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class AppColors {
   // Básicos
-  static const Color black = Color(0xFF000000);
-  static const Color white = Color(0xFFFFFFFF);
 
   // Fondos y superficies
   static const Color backgroundLogin = Color(0xFF17E86B);
-  static const Color backgroundIcon = Color(0xFF807EF5);
+  static const Color selectedBackgroundIcon = Color(0xFF000000);
+  static const Color backgroundIcon = Color(0xFF505050);
   static const Color background = Color(0xFFF8FAFD);
 
   // Texto
   static const Color primaryText = Color(0xFF000000);
   static const Color secondaryText = Color(0xFFFFFFFF);
 
-  // Campos y botones
-  static const Color colorField = Color(0xFFFFFBFB);
-  static const Color buttonColor = Color(0xFFFFFBFB);
-  static const Color searchColor = Color(0xFF5D6470);
-  static const Color lineOfDivider = Color(0xFFA7B0C0);
 
   // Escala de grises
   static const Color grayLight = Color(0xFFF5F5F5);

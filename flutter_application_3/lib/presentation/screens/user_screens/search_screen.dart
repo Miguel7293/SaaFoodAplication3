@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/core/constants/main_colors.dart';
 import 'package:flutter_application_example/data/models/plate.dart';
 import 'package:flutter_application_example/data/models/restaurant.dart';
 import 'package:flutter_application_example/presentation/theme/styles.dart';
@@ -55,6 +56,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final filteredRestaurants = _filterRestaurants();
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppStyles.appBar("Buscar Platos y Restaurantes"),
       body: Column(
         children: [

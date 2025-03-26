@@ -5,24 +5,28 @@ import 'package:flutter_application_example/presentation/screens/user_screens/ta
 import 'package:flutter_application_example/presentation/screens/user_screens/tabs/ratings_tab.dart';
 import '../../../core/constants/main_colors.dart';
 
-
 class RestDetailScreen extends StatelessWidget {
   final Restaurant res;
 
   const RestDetailScreen({super.key, required this.res});
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(res.name),
-          backgroundColor: AppColors.background,
+          title: Text(res.name,
+              style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          backgroundColor: AppColors.appBackground,
+          centerTitle: true,
+          elevation: 4,
           bottom: const TabBar(
-
             indicatorColor: AppColors.descriptionPrimary,
-            labelColor: Colors.black,
+            labelColor: AppColors.selectedBackgroundIcon,
+            unselectedLabelColor: AppColors.backgroundIcon, 
             tabs: [
               Tab(icon: Icon(Icons.schedule), text: "Horario"),
               Tab(icon: Icon(Icons.restaurant_menu), text: "Cartas"),

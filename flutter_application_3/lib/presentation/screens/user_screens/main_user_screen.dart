@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/core/constants/main_colors.dart';
 import 'package:flutter_application_example/data/services/plate_repository.dart';
 import 'package:flutter_application_example/data/models/plate.dart';
 import 'package:flutter_application_example/data/models/restaurant.dart';
@@ -53,6 +54,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: "SA Foods",
         onSearchPressed: () {

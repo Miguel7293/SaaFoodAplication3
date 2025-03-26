@@ -4,7 +4,7 @@ import 'package:flutter_application_example/presentation/theme/styles.dart';
 import 'package:provider/provider.dart'; // Asegúrate de importar provider
 import '../../../data/services/user_repository.dart';
 import '../../../data/models/user.dart';
-import '../../providers/auth_provider.dart'; // Asegúrate de importar el AuthProvider
+import '../../providers/auth_provider.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -25,6 +25,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppStyles.appBar("Perfil del Usuario"),
       body: FutureBuilder<User>(
         future: _userFuture,

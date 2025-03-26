@@ -128,59 +128,62 @@ class _RatingsTabState extends State<RatingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 10),
-        const Text("Calificaciones", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 10),
-        _buildStarRow(),
-        Text("${_averageRating.toStringAsFixed(1)} / 5", style: const TextStyle(fontSize: 16)),
-        const SizedBox(height: 10),
-        _buildRatingDistribution(),
-        const SizedBox(height: 20),
-        ElevatedButton.icon(
-          style: AppStyles.buttonStyle(AppColors.descriptionPrimary),
-          onPressed: () => _showRatingDialog(),
-          icon: const Icon(Icons.rate_review),
-          label: const Text("Dejar una calificación"),
-        ),
-        const SizedBox(height: 20),
-        Expanded(
-          child: _ratings.isEmpty
-              ? const Center(child: Text("No hay calificaciones aún"))
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: _ratings.length,
-                  itemBuilder: (context, index) {
-                    final rating = _ratings[index];
-                    return FutureBuilder<User>(
-                      future: _userRepo.getUserById(rating.userRestaurantId),
-                      builder: (context, userSnapshot) {
-                        if (userSnapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        if (userSnapshot.hasError || userSnapshot.data == null) {
-                          return const SizedBox();
-                        }
-                        final user = userSnapshot.data!;
-                        return RatingCard(
-                          rating: rating,
-                          user: user,
-                          currentUserId: _userId,
-                          onEdit: (rate) async {
-                            _showRatingDialog(rate: rate);
-                          },
-                          onDelete: (rateId) async {
-                            await _ratingService.deleteRating(rateId);
-                            await _fetchRatings();
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
-        ),
-      ],
+    return Container(
+      color: AppColors.background,
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+          const Text("Calificaciones", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          _buildStarRow(),
+          Text("${_averageRating.toStringAsFixed(1)} / 5", style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 10),
+          _buildRatingDistribution(),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            style: AppStyles.buttonStyle(AppColors.descriptionPrimary),
+            onPressed: () => _showRatingDialog(),
+            icon: const Icon(Icons.rate_review),
+            label: const Text("Dejar una calificación"),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: _ratings.isEmpty
+                ? const Center(child: Text("No hay calificaciones aún"))
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: _ratings.length,
+                    itemBuilder: (context, index) {
+                      final rating = _ratings[index];
+                      return FutureBuilder<User>(
+                        future: _userRepo.getUserById(rating.userRestaurantId),
+                        builder: (context, userSnapshot) {
+                          if (userSnapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          if (userSnapshot.hasError || userSnapshot.data == null) {
+                            return const SizedBox();
+                          }
+                          final user = userSnapshot.data!;
+                          return RatingCard(
+                            rating: rating,
+                            user: user,
+                            currentUserId: _userId,
+                            onEdit: (rate) async {
+                              _showRatingDialog(rate: rate);
+                            },
+                            onDelete: (rateId) async {
+                              await _ratingService.deleteRating(rateId);
+                              await _fetchRatings();
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
