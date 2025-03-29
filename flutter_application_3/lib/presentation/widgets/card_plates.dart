@@ -9,16 +9,21 @@ class CardPlates extends StatelessWidget {
 
   const CardPlates({super.key, required this.plate});
 
+  void _precacheHighResImage(BuildContext context, String imageUrl) {
+    precacheImage(NetworkImage(imageUrl), context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    _precacheHighResImage(context, plate.image); 
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                PlateDetailScreen(plate: plate), // Carga la imagen HD aquí
+            builder: (context) => PlateDetailScreen(plate: plate),
           ),
         ),
         borderRadius: BorderRadius.circular(10),
@@ -37,10 +42,10 @@ class CardPlates extends StatelessWidget {
                     width: 120,
                     height: 120,
                     fit: BoxFit.cover,
-                    fadeInDuration: const Duration(milliseconds: 300),
-                    placeholder: (context, url) =>
-                        _buildLowResImage(plate.image),
-                    errorWidget: (context, url, error) =>
+                    memCacheWidth: 800, // Se ajusta al tamaño 
+                    fadeInDuration: const Duration(milliseconds: 200),
+                    placeholder: (context, url) => _buildLowResImage(plate.image),
+                    errorWidget: (context, url, error) => 
                         const Icon(Icons.error, size: 50, color: Colors.red),
                   ),
                 ),
@@ -49,18 +54,14 @@ class CardPlates extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Text(
                   plate.name,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(0),
                 child: Text(
                   "S/.${plate.price?.toStringAsFixed(2) ?? '0.00'}",
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
                 ),
               ),
             ],
@@ -70,10 +71,8 @@ class CardPlates extends StatelessWidget {
     );
   }
 
-  /// 📌 Muestra una versión en baja resolución antes de la imagen real
   Widget _buildLowResImage(String highResUrl) {
-    String lowResUrl = highResUrl.replaceAll(
-        '.jpg', '_low.jpg'); // Simulación de baja resolución
+    String lowResUrl = highResUrl.replaceAll('.jpg', '_low.jpg');
     return Image.network(
       lowResUrl,
       width: 120,
@@ -82,7 +81,7 @@ class CardPlates extends StatelessWidget {
       errorBuilder: (context, error, stackTrace) => Container(
         width: 120,
         height: 120,
-        color: Colors.grey[300], // Placeholder si no hay imagen de baja calidad
+        color: Colors.grey[300],
       ),
     );
   }

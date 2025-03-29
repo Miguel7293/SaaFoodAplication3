@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_example/core/constants/main_colors.dart';
 import 'package:flutter_application_example/data/services/plate_repository.dart';
-import 'package:flutter_application_example/data/models/plate.dart';
-import 'package:flutter_application_example/data/models/restaurant.dart';
 import 'package:flutter_application_example/presentation/screens/user_screens/search_screen.dart';
 import 'package:flutter_application_example/presentation/widgets/search_app_bar.dart';
 import 'package:provider/provider.dart';
@@ -10,51 +8,29 @@ import '../../widgets/rest_list_view.dart';
 import '../../../data/services/restaurant_repository.dart';
 import '../../widgets/plates_list_view.dart';
 
-class UserHomeScreen extends StatefulWidget {
+class UserHomeScreen extends StatelessWidget {
   const UserHomeScreen({super.key});
 
-  @override
-  _UserHomeScreenState createState() => _UserHomeScreenState();
-}
+  Future<Map<String, dynamic>> _fetchData(BuildContext context) async {
+    final restaurantRepo = Provider.of<RestaurantRepository>(context, listen: false);
+    final plateRepo = PlateRepository();
 
-class _UserHomeScreenState extends State<UserHomeScreen> {
-  List<Restaurant> allRestaurants = [];
-  List<Restaurant> topRatedRestaurants = [];
-  List<Plate> bestPricedPlates = [];
-  List<Plate> allPlates = [];
+    final restaurants = await restaurantRepo.getAllRestaurants();
+    final bestRestaurants = await restaurantRepo.getTopRatedRestaurants();
+    final plates = await plateRepo.getAllPlates();
+    final pricedPlates = await plateRepo.getBestPricedPlates();
 
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    final restaurants =
-        await Provider.of<RestaurantRepository>(context, listen: false)
-            .getAllRestaurants();
-
-    final bestRestaurants = await Provider.of<RestaurantRepository>(context, listen: false).getTopRatedRestaurants();
-
-    final plates = await PlateRepository().getAllPlates();
-    final pricedPlates =  await PlateRepository().getBestPricedPlates();
-
-
-
-    if (mounted) {
-      setState(() {
-        topRatedRestaurants = bestRestaurants;
-        allRestaurants = restaurants;
-        allPlates = plates;
-        bestPricedPlates = pricedPlates;
-      });
-    }
+    return {
+      'restaurants': restaurants,
+      'topRatedRestaurants': bestRestaurants,
+      'allPlates': plates,
+      'bestPricedPlates': pricedPlates,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: "SA Foods",
@@ -62,26 +38,67 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => SearchScreen(
-                    allPlates: allPlates, allRestaurants: allRestaurants)),
+              builder: (context) => FutureBuilder<Map<String, dynamic>>(
+                future: _fetchData(context),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError || !snapshot.hasData) {
+                    return const Center(child: Text("Error al cargar datos"));
+                  }
+                  return SearchScreen(
+                    allPlates: snapshot.data!['allPlates'],
+                    allRestaurants: snapshot.data!['restaurants'],
+                  );
+                },
+              ),
+            ),
           );
         },
       ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _fetchData(context),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError || !snapshot.hasData) {
+            return const Center(child: Text("Error al cargar datos"));
+          }
 
-
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SectionTitle(title: "RESTAURANTES RECOMENDADOS"),
-            RestaurantsListView(restaurants: topRatedRestaurants),
-            const SectionTitle(title: "MEJORES PRECIOS"),
-            PlatesListView(plates: bestPricedPlates),
-            const SectionTitle(title: "PLATOS CERCA DE TI"),
-            PlatesListView(plates: allPlates),
-            const SizedBox(height: 180),
-          ],
-        ),
+          final data = snapshot.data!;
+          return ListView.builder(
+            key: const PageStorageKey<String>('user_home_screen'),
+            padding: const EdgeInsets.only(bottom: 180),
+            cacheExtent: 600, // Resolucion de imagen en cache
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Column(
+                  children: [
+                    const SectionTitle(title: "RESTAURANTES RECOMENDADOS"),
+                    RestaurantsListView(restaurants: data['topRatedRestaurants']),
+                  ],
+                );
+              } else if (index == 1) {
+                return Column(
+                  children: [
+                    const SectionTitle(title: "MEJORES PRECIOS"),
+                    PlatesListView(plates: data['bestPricedPlates']),
+                  ],
+                );
+              } else {
+                return Column(
+                  children: [
+                    const SectionTitle(title: "PLATOS CERCA DE TI"),
+                    PlatesListView(plates: data['allPlates']),
+                  ],
+                );
+              }
+            },
+          );
+        },
       ),
     );
   }
