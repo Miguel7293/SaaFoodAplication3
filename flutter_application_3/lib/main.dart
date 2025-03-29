@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_example/data/services/plate_repository.dart';
+import 'package:flutter_application_example/data/services/provider/data_provider.dart';
 import 'package:flutter_application_example/data/services/rate_repository.dart';
 import 'package:flutter_application_example/data/services/user_repository.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -28,6 +29,7 @@ void main() async {
         Provider(create: (_) => PlateRepository()),
 
         ChangeNotifierProvider(create: (_) => CartaProvider()),
+        ChangeNotifierProvider(create: (_) => DataProvider()),
 
       ],
       child: const App(),

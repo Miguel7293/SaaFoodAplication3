@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_example/core/constants/main_colors.dart';
 import 'package:flutter_application_example/data/models/plate.dart';
 import 'package:flutter_application_example/data/models/restaurant.dart';
+import 'package:flutter_application_example/data/services/provider/data_provider.dart';
 import 'package:flutter_application_example/presentation/theme/styles.dart';
 import 'package:flutter_application_example/presentation/widgets/plates_list_view.dart';
 import 'package:flutter_application_example/presentation/widgets/rest_list_view.dart';
+import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
   final List<Plate> allPlates;
   final List<Restaurant> allRestaurants;
 
-  const SearchScreen(
-      {super.key, required this.allPlates, required this.allRestaurants});
+  const SearchScreen({super.key, required this.allPlates, required this.allRestaurants});
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
@@ -27,33 +28,34 @@ class _SearchScreenState extends State<SearchScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_focusNode);
-      Future.delayed(Duration(milliseconds: 100), () {
-        setState(() {});
-        
-      });
     });
   }
 
-  List<Plate> _filterPlates() {
-    return widget.allPlates.where((plate) {
+  List<Plate> _filterPlates(List<Plate> plates) {
+    return plates.where((plate) {
       return plate.name.toLowerCase().contains(query.toLowerCase()) ||
           plate.description.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
 
-  List<Restaurant> _filterRestaurants() {
-    return widget.allRestaurants.where((restaurant) {
+  List<Restaurant> _filterRestaurants(List<Restaurant> restaurants, List<Plate> plates) {
+    return restaurants.where((restaurant) {
       return restaurant.name.toLowerCase().contains(query.toLowerCase()) ||
-          widget.allPlates.any((plate) =>
+          plates.any((plate) =>
               plate.cartId == restaurant.restaurantId &&
-              (plate.name.toLowerCase().contains(query.toLowerCase())));
+              plate.name.toLowerCase().contains(query.toLowerCase()));
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredPlates = _filterPlates();
-    final filteredRestaurants = _filterRestaurants();
+    final dataProvider = Provider.of<DataProvider>(context);
+
+    final plates = widget.allPlates.isNotEmpty ? widget.allPlates : dataProvider.allPlates;
+    final restaurants = widget.allRestaurants.isNotEmpty ? widget.allRestaurants : dataProvider.restaurants;
+
+    final filteredPlates = _filterPlates(plates);
+    final filteredRestaurants = _filterRestaurants(restaurants, plates);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -68,8 +70,7 @@ class _SearchScreenState extends State<SearchScreen> {
               decoration: InputDecoration(
                 hintText: "Buscar platos o restaurantes...",
                 prefixIcon: const Icon(Icons.search),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
               onChanged: (value) {
                 setState(() {
@@ -85,9 +86,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (filteredPlates.isNotEmpty)
-                      ...filteredPlates
-                          .map((plate) => _buildRestaurantWithPlates(plate))
-                          .toList(),
+                      ...filteredPlates.map((plate) => _buildRestaurantWithPlates(plate, restaurants)).toList(),
                     if (filteredRestaurants.isNotEmpty) ...[
                       const SectionTitle(title: "RESTAURANTES"),
                       RestaurantsListView(restaurants: filteredRestaurants),
@@ -102,8 +101,8 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildRestaurantWithPlates(Plate plate) {
-    final restaurant = widget.allRestaurants.firstWhere(
+  Widget _buildRestaurantWithPlates(Plate plate, List<Restaurant> restaurants) {
+    final restaurant = restaurants.firstWhere(
       (res) => res.restaurantId == plate.cartId,
       orElse: () => Restaurant(
           restaurantId: 0,

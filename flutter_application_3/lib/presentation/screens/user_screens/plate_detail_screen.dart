@@ -59,7 +59,7 @@ class PlateDetailScreen extends StatelessWidget {
       width: double.infinity,
       height: 250, 
       fit: BoxFit.cover,
-      memCacheWidth: 800, //se iguala al anterior cache size
+      memCacheWidth: 700, //se iguala al anterior cache size
       placeholder: (context, url) => Container(
         height: 250,
         color: Colors.grey[300],

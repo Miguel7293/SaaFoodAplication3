@@ -42,7 +42,7 @@ class CardPlates extends StatelessWidget {
                     width: 120,
                     height: 120,
                     fit: BoxFit.cover,
-                    memCacheWidth: 800, // Se ajusta al tamaño 
+                    memCacheWidth: 700, // Se ajusta al tamaño 
                     fadeInDuration: const Duration(milliseconds: 200),
                     placeholder: (context, url) => _buildLowResImage(plate.image),
                     errorWidget: (context, url, error) => 

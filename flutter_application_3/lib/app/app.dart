@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_example/data/services/provider/data_provider.dart';
 //import 'package:flutter_application_example/domain/pruevaScreen.dart';
 import 'package:flutter_application_example/presentation/navigation/owner_nav_bar.dart';
 import 'package:flutter_application_example/presentation/screens/auth/choosing_role_screen.dart';
@@ -16,21 +17,22 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => DataProvider()),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         initialRoute: '/login',
         routes: {
           '/login': (context) => const LoginScreen(),
-          '/signup': (context) => const SignupScreen(), // posiblemente lo quitemos
-          '/customer': (context) => const MainNavBar(), // cliente
-          '/owner': (context) => const MainOwnerNavBar(), // dueño
+          '/signup': (context) => const SignupScreen(),
+          '/customer': (context) => const MainNavBar(),
+          '/owner': (context) => const MainOwnerNavBar(),
           '/choosing-role': (context) => const ChoosingRoleScreen(),
           '/owner-survey': (context) => const OwnerSurveyScreen(),
           '/waiting-approval': (context) => const WaitingApprovalScreen(),
-
-
         },
       ),
     );
